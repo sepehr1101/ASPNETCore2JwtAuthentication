@@ -19,6 +19,9 @@ namespace AuthServer.DataLayer.Context
         public virtual DbSet<AuthLeve2> AuthLevel2s{get;set;}
         public virtual DbSet<AuthLeve3> AuthLevel3s{get;set;}
         public virtual DbSet<AuthLeve4> AuthLevel4s{get;set;}
+        public virtual DbSet<Policy> Policies{get;set;}
+        public virtual DbSet<Login> Logins{get;set;}
+        public virtual DbSet<Browser> Browsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -34,13 +37,18 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e => e.LastName).HasMaxLength(450).IsRequired();
                 entity.Property(e => e.Email).HasMaxLength(450).IsRequired();
                 entity.Property(e => e.EmailConfirmed).IsRequired();
-                entity.Property(e => e.JoinTimespan).IsRequired();
-                
+                entity.Property(e => e.JoinTimespan).IsRequired();                
                 entity.Property(e => e.Password).IsRequired();
                 entity.Property(e => e.SerialNumber).HasMaxLength(450);
                 entity.HasOne(e => e.UserToken)
                       .WithOne(ut => ut.User)
                       .HasForeignKey<UserToken>(ut => ut.UserId); // one-to-one association
+                
+                entity.Property(e=>e.InvalidLoginAttemptCount).IsRequired();
+                entity.Property(e=>e.IsLocked).IsRequired();
+                entity.Property(e=>e.LockTimespan).IsRequired();
+                entity.Property(e=>e.RequireRecaptcha).IsRequired();
+                entity.Property(e=>e.IncludeThisRecord).IsRequired();
             });
 
             builder.Entity<Role>(entity =>
@@ -96,6 +104,26 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.Title).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.Value).IsRequired();
                 entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLeve3Id);
+            });
+
+            builder.Entity<Policy>(entity =>{
+                entity.Property(e=>e.EnableValidIpRecaptcha).IsRequired();
+                entity.Property(e=>e.IsActive).IsRequired();
+                entity.Property(e=>e.LockInvalidAttempts).IsRequired();
+                entity.Property(e=>e.RequireRecaptchaInvalidAttempts).IsRequired();
+            });
+
+             builder.Entity<Browser>(entity =>{
+                entity.Property(e=>e.TitleEng).HasMaxLength(31).IsRequired();
+                entity.Property(e=>e.TitleFa).HasMaxLength(31).IsRequired();                  
+            });
+
+            builder.Entity<Login>(entity =>{
+                entity.Property(e=>e.LoginIP).HasMaxLength(63);
+                entity.Property(e=>e.LoginTimespan).IsRequired();
+                entity.Property(e=>e.WasSuccessful).IsRequired();
+                entity.HasOne(e=>e.Browser).WithMany(e=>e.Logins).HasForeignKey(e=>e.BrowserId);
+                entity.HasOne(e=>e.User).WithMany(e=>e.Logins).HasForeignKey(e=>e.UserId);
             });
         }
     }

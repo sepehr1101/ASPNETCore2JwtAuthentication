@@ -9,6 +9,7 @@ namespace AuthServer.DomainClasses
         {
             UserRoles = new HashSet<UserRole>();
             UserClaims=new HashSet<UserClaim>();
+            Logins=new HashSet<Login>();
         }
 
         public Guid Id { get; set; }
@@ -40,9 +41,17 @@ namespace AuthServer.DomainClasses
         
         public DateTimeOffset JoinTimespan { get; set; }
 
+        public int InvalidLoginAttemptCount { get; set; }
+        public bool IsLocked { get; set; }
+        public DateTimeOffset LockTimespan { get; set; }
+
+        public bool RequireRecaptcha { get; set; }
+
+        public bool IncludeThisRecord { get; set; }
+
         public virtual ICollection<UserRole> UserRoles { get; set; }
         public virtual ICollection<UserClaim> UserClaims { get; set; }
-
-        public virtual UserToken UserToken { get; set; }
+        public virtual ICollection<Login> Logins{get;set;}
+        public virtual UserToken UserToken { get; set; }       
     }
 }

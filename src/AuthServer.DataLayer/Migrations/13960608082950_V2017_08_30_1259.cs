@@ -37,7 +37,12 @@ namespace AuthServer.DataLayer.Migrations
                     LastLoggedIn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     JoinTimespan=table.Column<DateTimeOffset>(type:"datetimeoffset",nullable:false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SerialNumber = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true)                   
+                    SerialNumber = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
+                    InvalidLoginAttemptCount= table.Column<int>(type:"int",nullable:false),
+                    IsLocked=table.Column<bool>(type:"bit",nullable:false),
+                    LockTimespan=table.Column<DateTimeOffset>(type:"datetimeoffset",nullable:true),
+                    RequireRecaptcha= table.Column<int>(type:"int",nullable:false),
+                    IncludeThisRecord= table.Column<int>(type:"int",nullable:false)
                 },
                 constraints: table =>
                 {
@@ -98,8 +103,8 @@ namespace AuthServer.DataLayer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClaimType = table.Column<int>(type: "nvarchar(MAX)", nullable: true),
-                    ClaimValue = table.Column<int>(type: "nvarchar(MAX)", nullable: true)
+                    ClaimType = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(MAX)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -194,6 +199,65 @@ namespace AuthServer.DataLayer.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "Policies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    EnableValidIpRecaptcha = table.Column<bool>(type: "bit", nullable: false),
+                    RequireRecaptchaInvalidAttempts = table.Column<int>(type: "int", nullable: false),
+                    LockInvalidAttempts = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Policies", x => x.Id);                   
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Browsers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    TitleEng = table.Column<string>(type: "nvarchar(31)", nullable: false),
+                    TitleFa = table.Column<string>(type: "nvarchar(31)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Browser", x => x.Id);                   
+                });
+
+
+            migrationBuilder.CreateTable(
+                name: "Logins",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BrowserId = table.Column<int>(type: "int", nullable: false),
+                    LoginTimespan = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LoginIP = table.Column<string>(type: "varchar(63)", nullable: false),
+                    WasSuccessful = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Logins", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Logins_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Logins_Browsers_BrowserId",
+                        column: x => x.BrowserId,
+                        principalTable: "Browsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
             //----------------------------------------------- Index----------------------------------------
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
@@ -226,8 +290,12 @@ namespace AuthServer.DataLayer.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserClaims_UserId",
                 table: "UserClaims",
-                column: "UserId",
-                unique: true);
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Logins_UserId",
+                table: "Logins",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -259,6 +327,15 @@ namespace AuthServer.DataLayer.Migrations
             );
             migrationBuilder.DropTable(
                 name:"AuthLevel4"
+            );
+             migrationBuilder.DropTable(
+                name:"Policies"
+            );
+             migrationBuilder.DropTable(
+                name:"Browsers"
+            );
+             migrationBuilder.DropTable(
+                name:"Logins"
             );
         }
     }
