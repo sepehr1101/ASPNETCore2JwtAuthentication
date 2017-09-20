@@ -15,9 +15,13 @@ namespace AuthServer.DomainClasses
 
         public string Username { get; set; }
 
-        //public string FirstName { get; set; } 
+        public string FirstName { get; set; } 
 
-        //public string LastName { get; set; }
+        public string LastName { get; set; }
+
+        public string Email { get; set; }
+
+        public bool EmailConfirmed { get; set; }
 
         public string Password { get; set; }
 
@@ -32,13 +36,9 @@ namespace AuthServer.DomainClasses
         /// or an admin changes his Roles or stat/IsActive,
         /// create a new `SerialNumber` GUID and store it in the DB.
         /// </summary>
-        public string SerialNumber { get; set; }
-
-       // public string Email { get; set; }
-
-        //public bool EmailConfirmed { get; set; }
+        public string SerialNumber { get; set; }      
         
-        //public DateTimeOffset JoinTimespan { get; set; }
+        public DateTimeOffset JoinTimespan { get; set; }
 
         public virtual ICollection<UserRole> UserRoles { get; set; }
         public virtual ICollection<UserClaim> UserClaims { get; set; }

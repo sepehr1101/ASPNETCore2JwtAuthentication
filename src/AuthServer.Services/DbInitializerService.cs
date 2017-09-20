@@ -64,7 +64,7 @@ namespace AuthServer.Services
                         context.Add(userRole);
                         context.SaveChanges();
                     }
-
+                    
                     // Add Admin user
                     if (!context.Users.Any())
                     {
@@ -76,7 +76,12 @@ namespace AuthServer.Services
                             IsActive = true,
                             LastLoggedIn = null,
                             Password = _securityService.GetSha256Hash("123456"),
-                            SerialNumber = Guid.NewGuid().ToString("N")
+                            SerialNumber = Guid.NewGuid().ToString("N"),
+                            FirstName="سپهر" ,
+                            LastName="شمس" ,
+                            JoinTimespan= DateTimeOffset.UtcNow,
+                            Email="sepehr@example.com",
+                            EmailConfirmed=false
                         };
                         context.Add(adminUser);
                         var adminUserRole=new UserRole { Role = adminRole, User = adminUser };

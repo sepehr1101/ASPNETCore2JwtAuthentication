@@ -27,12 +27,17 @@ namespace AuthServer.DataLayer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    FirstName=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
+                    LastName=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
+                    Email=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
+                    EmailConfirmed=table.Column<bool>(type:"bit",nullable:false),
                     DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     LastLoggedIn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    JoinTimespan=table.Column<DateTimeOffset>(type:"datetimeoffset",nullable:false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SerialNumber = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    Username = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
+                    SerialNumber = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true)                   
                 },
                 constraints: table =>
                 {

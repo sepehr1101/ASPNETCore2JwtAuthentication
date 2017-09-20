@@ -43,20 +43,36 @@ namespace AuthServer.DataLayer.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(450);
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(450);
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(450);
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(450);
+
+                    b.Property<bool>("EmailConfirmed")
+                        .IsRequired();
+
                     b.Property<string>("DisplayName");
 
                     b.Property<bool>("IsActive");
 
                     b.Property<DateTimeOffset?>("LastLoggedIn");
+                    b.Property<DateTimeOffset>("JoinTimespan");
 
                     b.Property<string>("Password")
                         .IsRequired();
 
                     b.Property<string>("SerialNumber")
-                        .HasMaxLength(450);
-
-                    b.Property<string>("Username")
-                        .IsRequired()
                         .HasMaxLength(450);
 
                     b.HasKey("Id");

@@ -30,6 +30,11 @@ namespace AuthServer.DataLayer.Context
             {
                 entity.Property(e => e.Username).HasMaxLength(450).IsRequired();
                 entity.HasIndex(e => e.Username).IsUnique();
+                entity.Property(e => e.FirstName).HasMaxLength(450).IsRequired();
+                entity.Property(e => e.LastName).HasMaxLength(450).IsRequired();
+                entity.Property(e => e.Email).HasMaxLength(450).IsRequired();
+                entity.Property(e => e.EmailConfirmed).IsRequired();
+                entity.Property(e => e.JoinTimespan).IsRequired();
                 
                 entity.Property(e => e.Password).IsRequired();
                 entity.Property(e => e.SerialNumber).HasMaxLength(450);
