@@ -14,7 +14,7 @@ namespace AuthServer.DomainClasses
 
         public DateTimeOffset RefreshTokenExpiresDateTime { get; set; }
 
-        public int UserId { get; set; } // one-to-one association
+        public Guid UserId { get; set; } // one-to-one association
         public virtual User User { get; set; }
     }
 }

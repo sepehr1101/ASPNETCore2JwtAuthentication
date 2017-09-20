@@ -6,12 +6,19 @@ namespace AuthServer.DataLayer.Context
     public class ApplicationDbContext : DbContext, IUnitOfWork
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
-        { }
+        { 
+            
+        }
 
         public virtual DbSet<User> Users { set; get; }
         public virtual DbSet<Role> Roles { set; get; }
         public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<UserToken> UserTokens { get; set; }
+        public virtual DbSet<UserClaim> UserClaims{get;set;}
+        public virtual DbSet<AuthLeve1> AuthLevel1s{get;set;}
+        public virtual DbSet<AuthLeve2> AuthLevel2s{get;set;}
+        public virtual DbSet<AuthLeve3> AuthLevel3s{get;set;}
+        public virtual DbSet<AuthLeve4> AuthLevel4s{get;set;}
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -23,6 +30,7 @@ namespace AuthServer.DataLayer.Context
             {
                 entity.Property(e => e.Username).HasMaxLength(450).IsRequired();
                 entity.HasIndex(e => e.Username).IsUnique();
+                
                 entity.Property(e => e.Password).IsRequired();
                 entity.Property(e => e.SerialNumber).HasMaxLength(450);
                 entity.HasOne(e => e.UserToken)
@@ -49,6 +57,40 @@ namespace AuthServer.DataLayer.Context
 
             builder.Entity<UserToken>(entity =>
             {
+            });
+
+            builder.Entity<UserClaim>(entity=>{
+                entity.HasIndex(e=>e.UserId);
+                entity.HasOne(e=>e.User).WithMany(e=>e.UserClaims).HasForeignKey(e=>e.UserId);
+            });
+
+            builder.Entity<AuthLeve1>(entity=>{
+                entity.Property(e=>e.AppBoundaryTitle).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.AppBoundaryCode).IsRequired();
+            });
+
+            builder.Entity<AuthLeve2>(entity=>{
+                entity.Property(e=>e.ElementId).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.IconClass).IsRequired();
+                entity.Property(e=>e.Title).HasMaxLength(255).IsRequired();
+                entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLeve1Id);
+            });
+
+             builder.Entity<AuthLeve3>(entity=>{
+                entity.Property(e=>e.ElementId).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.Action).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.Controller).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.Domain).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.Parameters).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.PreRoute).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.Title).HasMaxLength(255).IsRequired();
+                entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLeve2Id);
+            });
+
+              builder.Entity<AuthLeve4>(entity=>{
+                entity.Property(e=>e.Title).HasMaxLength(255).IsRequired();
+                entity.Property(e=>e.Value).IsRequired();
+                entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLeve3Id);
             });
         }
     }

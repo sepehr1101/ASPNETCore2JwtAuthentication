@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthServer.Common;
 using System.Threading.Tasks;
+using System;
 
 namespace AuthServer.WebApp.Controllers
 {
@@ -27,11 +28,11 @@ namespace AuthServer.WebApp.Controllers
 
             return Ok(new
             {
-                Id = 1,
+                Id = Guid.NewGuid(),
                 Title = "Hello from My Protected Admin Api Controller!",
                 Username = this.User.Identity.Name,
                 UserData = userId,
-                TokenSerialNumber = await _usersService.GetSerialNumberAsync(int.Parse(userId)).ConfigureAwait(false)
+                TokenSerialNumber = await _usersService.GetSerialNumberAsync(Guid.Parse(userId)).ConfigureAwait(false)
             });
         }
     }

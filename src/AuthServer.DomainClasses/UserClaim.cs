@@ -1,6 +1,5 @@
 using System;
-
-namespace ASPNETCore2JwtAuthentication.DomainClasses
+namespace AuthServer.DomainClasses
 {
     public class UserClaim
     {      

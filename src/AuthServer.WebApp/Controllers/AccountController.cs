@@ -82,7 +82,7 @@ namespace AuthServer.WebApp.Controllers
 
             // The Jwt implementation does not support "revoke OAuth token" (logout) by design.
             // Delete the user's tokens from the database (revoke its bearer token)
-            if (!string.IsNullOrWhiteSpace(userIdValue) && int.TryParse(userIdValue, out int userId))
+            if (!string.IsNullOrWhiteSpace(userIdValue) && System.Guid.TryParse(userIdValue, out System.Guid userId))
             {
                 await _tokenStoreService.InvalidateUserTokensAsync(userId).ConfigureAwait(false);
             }

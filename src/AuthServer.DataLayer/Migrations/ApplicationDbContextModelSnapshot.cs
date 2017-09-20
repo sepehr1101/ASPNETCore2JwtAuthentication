@@ -15,7 +15,7 @@ namespace AuthServer.DataLayer.Migrations
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
-#pragma warning disable 612, 618
+        #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.0-rtm-26452")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -39,7 +39,7 @@ namespace AuthServer.DataLayer.Migrations
 
             modelBuilder.Entity("AuthServer.DomainClasses.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("DisplayName");
@@ -68,7 +68,7 @@ namespace AuthServer.DataLayer.Migrations
 
             modelBuilder.Entity("AuthServer.DomainClasses.UserRole", b =>
                 {
-                    b.Property<int>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.Property<int>("RoleId");
 
@@ -94,7 +94,7 @@ namespace AuthServer.DataLayer.Migrations
 
                     b.Property<string>("RefreshTokenIdHash");
 
-                    b.Property<int>("UserId");
+                    b.Property<Guid>("UserId");
 
                     b.HasKey("Id");
 
@@ -124,7 +124,7 @@ namespace AuthServer.DataLayer.Migrations
                         .HasForeignKey("AuthServer.DomainClasses.UserToken", "UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
-#pragma warning restore 612, 618
+        #pragma warning restore 612, 618
         }
     }
 }

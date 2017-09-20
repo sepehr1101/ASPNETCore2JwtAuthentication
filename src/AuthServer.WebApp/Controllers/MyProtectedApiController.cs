@@ -11,7 +11,7 @@ namespace AuthServer.WebApp.Controllers
         {
             return Ok(new
             {
-                Id = 1,
+                Id = System.Guid.NewGuid(),
                 Title = "Hello from My Protected Controller!",
                 Username = this.User.Identity.Name
             });

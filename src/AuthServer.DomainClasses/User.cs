@@ -8,11 +8,16 @@ namespace AuthServer.DomainClasses
         public User()
         {
             UserRoles = new HashSet<UserRole>();
+            UserClaims=new HashSet<UserClaim>();
         }
 
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Username { get; set; }
+
+        //public string FirstName { get; set; } 
+
+        //public string LastName { get; set; }
 
         public string Password { get; set; }
 
@@ -29,7 +34,14 @@ namespace AuthServer.DomainClasses
         /// </summary>
         public string SerialNumber { get; set; }
 
+       // public string Email { get; set; }
+
+        //public bool EmailConfirmed { get; set; }
+        
+        //public DateTimeOffset JoinTimespan { get; set; }
+
         public virtual ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<UserClaim> UserClaims { get; set; }
 
         public virtual UserToken UserToken { get; set; }
     }

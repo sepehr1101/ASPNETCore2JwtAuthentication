@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using AuthServer.Common;
@@ -10,8 +11,8 @@ namespace AuthServer.Services
 {
     public interface IRolesService
     {
-        Task<List<Role>> FindUserRolesAsync(int userId);
-        Task<bool> IsUserInRole(int userId, string roleName);
+        Task<List<Role>> FindUserRolesAsync(Guid userId);
+        Task<bool> IsUserInRole(Guid userId, string roleName);
         Task<List<User>> FindUsersInRoleAsync(string roleName);
     }
 
@@ -30,7 +31,7 @@ namespace AuthServer.Services
             _users = _uow.Set<User>();
         }
 
-        public Task<List<Role>> FindUserRolesAsync(int userId)
+        public Task<List<Role>> FindUserRolesAsync(System.Guid userId)
         {
             var userRolesQuery = from role in _roles
                                  from userRoles in role.UserRoles
@@ -40,7 +41,7 @@ namespace AuthServer.Services
             return userRolesQuery.OrderBy(x => x.Name).ToListAsync();
         }
 
-        public async Task<bool> IsUserInRole(int userId, string roleName)
+        public async Task<bool> IsUserInRole(System.Guid userId, string roleName)
         {
             var userRolesQuery = from role in _roles
                                  where role.Name == roleName

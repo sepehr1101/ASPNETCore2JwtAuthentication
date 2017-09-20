@@ -1,8 +1,10 @@
+using System;
+
 namespace AuthServer.DomainClasses
 {
     public class UserRole
     {
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public int RoleId { get; set; }
 
         public virtual User User { get; set; }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace AuthServer.DomainClasses
 {
-    public class Role
+     public class Role
     {
         public Role()
         {

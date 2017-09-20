@@ -20,11 +20,11 @@ namespace AuthServer.Services
         Task AddUserTokenAsync(
                 User user, string refreshToken, string accessToken,
                 DateTimeOffset refreshTokenExpiresDateTime, DateTimeOffset accessTokenExpiresDateTime);
-        Task<bool> IsValidTokenAsync(string accessToken, int userId);
+        Task<bool> IsValidTokenAsync(string accessToken, Guid userId);
         Task DeleteExpiredTokensAsync();
         Task<UserToken> FindTokenAsync(string refreshToken);
         Task DeleteTokenAsync(string refreshToken);
-        Task InvalidateUserTokensAsync(int userId);
+        Task InvalidateUserTokensAsync(Guid userId);
         Task<(string accessToken, string refreshToken)> CreateJwtTokens(User user);
     }
 
@@ -35,11 +35,13 @@ namespace AuthServer.Services
         private readonly DbSet<UserToken> _tokens;
         private readonly IOptionsSnapshot<BearerTokensOptions> _configuration;
         private readonly IRolesService _rolesService;
+        private readonly IClaimService _claimService;
 
         public TokenStoreService(
             IUnitOfWork uow,
             ISecurityService securityService,
             IRolesService rolesService,
+            IClaimService claimService,
             IOptionsSnapshot<BearerTokensOptions> configuration)
         {
             _uow = uow;
@@ -50,6 +52,9 @@ namespace AuthServer.Services
 
             _rolesService = rolesService;
             _rolesService.CheckArgumentIsNull(nameof(rolesService));
+
+            _claimService=claimService;
+            _claimService.CheckArgumentIsNull(nameof(claimService));
 
             _tokens = _uow.Set<UserToken>();
 
@@ -108,7 +113,7 @@ namespace AuthServer.Services
             return _tokens.Include(x => x.User).FirstOrDefaultAsync(x => x.RefreshTokenIdHash == refreshTokenIdHash);
         }
 
-        public async Task InvalidateUserTokensAsync(int userId)
+        public async Task InvalidateUserTokensAsync(System.Guid userId)
         {
             var userTokens = await _tokens.Where(x => x.UserId == userId).ToListAsync().ConfigureAwait(false);
             foreach (var userToken in userTokens)
@@ -117,7 +122,7 @@ namespace AuthServer.Services
             }
         }
 
-        public async Task<bool> IsValidTokenAsync(string accessToken, int userId)
+        public async Task<bool> IsValidTokenAsync(string accessToken, Guid userId)
         {
             var accessTokenHash = _securityService.GetSha256Hash(accessToken);
             var userToken = await _tokens.FirstOrDefaultAsync(
@@ -155,8 +160,12 @@ namespace AuthServer.Services
                 // to invalidate the cookie
                 new Claim(ClaimTypes.SerialNumber, user.SerialNumber),
                 // custom data
-                new Claim(ClaimTypes.UserData, user.Id.ToString())
+                new Claim(ClaimTypes.UserData, user.Id.ToString()),
+                new Claim("jeasus","ss")
             };
+
+            var extraClaims=_claimService.GetClaims(user.Id);
+            claims.AddRange(extraClaims);
 
             // add roles
             var roles = await _rolesService.FindUserRolesAsync(user.Id).ConfigureAwait(false);

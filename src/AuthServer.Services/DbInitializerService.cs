@@ -70,18 +70,22 @@ namespace AuthServer.Services
                     {
                         var adminUser = new User
                         {
-                            Username = "Vahid",
-                            DisplayName = "وحيد",
+                            Id=Guid.NewGuid(),
+                            Username = "sepehr",
+                            DisplayName = "تست",
                             IsActive = true,
                             LastLoggedIn = null,
-                            Password = _securityService.GetSha256Hash("1234"),
+                            Password = _securityService.GetSha256Hash("123456"),
                             SerialNumber = Guid.NewGuid().ToString("N")
                         };
                         context.Add(adminUser);
-                        context.SaveChanges();
+                        var adminUserRole=new UserRole { Role = adminRole, User = adminUser };
+                        var userUserRole=new UserRole { Role = userRole, User = adminUser };
+                        var userRoles=new UserRole[]{adminUserRole,userUserRole};
+                        adminUser.UserRoles=userRoles;
 
-                        context.Add(new UserRole { Role = adminRole, User = adminUser });
-                        context.Add(new UserRole { Role = userRole, User = adminUser });
+                        var claim=new UserClaim{ClaimType="zoneId",ClaimValue="131301"};
+                        adminUser.UserClaims=new UserClaim[]{claim};
                         context.SaveChanges();
                     }
                 }

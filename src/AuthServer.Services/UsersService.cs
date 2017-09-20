@@ -11,10 +11,10 @@ namespace AuthServer.Services
 {
     public interface IUsersService
     {
-        Task<string> GetSerialNumberAsync(int userId);
+        Task<string> GetSerialNumberAsync(Guid userId);
         Task<User> FindUserAsync(string username, string password);
-        Task<User> FindUserAsync(int userId);
-        Task UpdateUserLastActivityDateAsync(int userId);
+        Task<User> FindUserAsync(Guid userId);
+        Task UpdateUserLastActivityDateAsync(Guid userId);
     }
 
     public class UsersService : IUsersService
@@ -34,7 +34,7 @@ namespace AuthServer.Services
             _securityService.CheckArgumentIsNull(nameof(_securityService));
         }
 
-        public Task<User> FindUserAsync(int userId)
+        public Task<User> FindUserAsync(Guid userId)
         {
             return _users.FindAsync(userId);
         }
@@ -45,13 +45,13 @@ namespace AuthServer.Services
             return _users.FirstOrDefaultAsync(x => x.Username == username && x.Password == passwordHash);
         }
 
-        public async Task<string> GetSerialNumberAsync(int userId)
+        public async Task<string> GetSerialNumberAsync(Guid userId)
         {
             var user = await FindUserAsync(userId).ConfigureAwait(false);
             return user.SerialNumber;
         }
 
-        public async Task UpdateUserLastActivityDateAsync(int userId)
+        public async Task UpdateUserLastActivityDateAsync(Guid userId)
         {
             var user = await FindUserAsync(userId).ConfigureAwait(false);
             if (user.LastLoggedIn != null)

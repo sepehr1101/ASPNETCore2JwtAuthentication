@@ -45,7 +45,7 @@ namespace AuthServer.Services
             }
 
             var userIdString = claimsIdentity.FindFirst(ClaimTypes.UserData).Value;
-            if (!int.TryParse(userIdString, out int userId))
+            if (!System.Guid.TryParse(userIdString, out System.Guid userId))
             {
                 context.Fail("This is not our issued token. It has no user-id.");
                 return;
