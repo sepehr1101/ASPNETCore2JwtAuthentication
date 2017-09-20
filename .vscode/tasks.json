@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}/src/ASPNETCore2JwtAuthentication.WebApp/ASPNETCore2JwtAuthentication.WebApp.csproj"
+                "${workspaceRoot}/src/AuthServer.WebApp/AuthServer.WebApp.csproj"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"
