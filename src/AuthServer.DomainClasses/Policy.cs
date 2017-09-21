@@ -7,5 +7,10 @@ namespace AuthServer.DomainClasses
         public int RequireRecaptchaInvalidAttempts { get; set; }
         public int LockInvalidAttempts { get; set; }
         public bool IsActive { get; set; }
+        public int MinPasswordLength { get; set; }
+        public bool PasswordContainsNumber { get; set; }
+        public bool PasswordContainsLowercase { get; set; }
+        public bool PasswordContainsUppercase { get; set; }
+        public bool PasswordContainsNonAlphaNumeric { get; set; }        
     }    
 }

@@ -41,8 +41,8 @@ namespace AuthServer.DataLayer.Migrations
                     InvalidLoginAttemptCount= table.Column<int>(type:"int",nullable:false),
                     IsLocked=table.Column<bool>(type:"bit",nullable:false),
                     LockTimespan=table.Column<DateTimeOffset>(type:"datetimeoffset",nullable:true),
-                    RequireRecaptcha= table.Column<int>(type:"int",nullable:false),
-                    IncludeThisRecord= table.Column<int>(type:"int",nullable:false)
+                    RequireRecaptcha= table.Column<bool>(type:"bit",nullable:false),
+                    IncludeThisRecord= table.Column<bool>(type:"bit",nullable:false)
                 },
                 constraints: table =>
                 {
@@ -209,7 +209,12 @@ namespace AuthServer.DataLayer.Migrations
                     EnableValidIpRecaptcha = table.Column<bool>(type: "bit", nullable: false),
                     RequireRecaptchaInvalidAttempts = table.Column<int>(type: "int", nullable: false),
                     LockInvalidAttempts = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    MinPasswordLength=table.Column<int>(type:"int",nullable:false),
+                    PasswordContainsNumber = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordContainsLowercase = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordContainsUppercase = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordContainsNonAlphaNumeric = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -220,16 +225,30 @@ namespace AuthServer.DataLayer.Migrations
                 name: "Browsers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     TitleEng = table.Column<string>(type: "nvarchar(31)", nullable: false),
-                    TitleFa = table.Column<string>(type: "nvarchar(31)", nullable: false)
+                    TitleFa = table.Column<string>(type: "nvarchar(31)", nullable: false),
+                    IconClass=table.Column<string>(type:"varchar(31)",nullable:false),
+                    AcceptRequestFrom = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Browser", x => x.Id);                   
                 });
 
+            migrationBuilder.CreateTable(
+                name: "OSes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(31)", nullable: false),                   
+                    IconClass=table.Column<string>(type:"varchar(31)",nullable:false),
+                    AcceptRequestFrom = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Os", x => x.Id);                   
+                });
 
             migrationBuilder.CreateTable(
                 name: "Logins",
@@ -237,10 +256,13 @@ namespace AuthServer.DataLayer.Migrations
                 {
                     Id = table.Column<int>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BrowserId = table.Column<int>(type: "int", nullable: false),
+                    BrowserId = table.Column<int>(type: "int", nullable: true),
                     LoginTimespan = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LoginIP = table.Column<string>(type: "varchar(63)", nullable: false),
-                    WasSuccessful = table.Column<bool>(type: "bit", nullable: false)
+                    WasSuccessful = table.Column<bool>(type: "bit", nullable: false),
+                    OsId=table.Column<int>(type:"int",nullable:true),
+                    BrowserVersion=table.Column<string>(type:"nvarchar(31)",nullable:true),
+                    OsVersion=table.Column<string>(type:"nvarchar(31)",nullable:true)
                 },
                 constraints: table =>
                 {
@@ -257,7 +279,14 @@ namespace AuthServer.DataLayer.Migrations
                         principalTable: "Browsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Logins_OSes_OsId",
+                        column: x => x.OsId,
+                        principalTable: "OSes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+          
             //----------------------------------------------- Index----------------------------------------
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
@@ -336,6 +365,9 @@ namespace AuthServer.DataLayer.Migrations
             );
              migrationBuilder.DropTable(
                 name:"Logins"
+            );
+             migrationBuilder.DropTable(
+                name:"OSes"
             );
         }
     }

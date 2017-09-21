@@ -139,7 +139,7 @@ namespace AuthServer.Services
             var refreshToken = Guid.NewGuid().ToString().Replace("-", "");
 
             await AddUserTokenAsync(user, refreshToken, accessToken, refreshTokenExpiresDateTime, accessTokenExpiresDateTime).ConfigureAwait(false);
-            await _uow.SaveChangesAsync().ConfigureAwait(false);
+            //await _uow.SaveChangesAsync().ConfigureAwait(false);
 
             return (accessToken, refreshToken);
         }
@@ -160,8 +160,7 @@ namespace AuthServer.Services
                 // to invalidate the cookie
                 new Claim(ClaimTypes.SerialNumber, user.SerialNumber),
                 // custom data
-                new Claim(ClaimTypes.UserData, user.Id.ToString()),
-                new Claim("jeasus","ss")
+                new Claim(ClaimTypes.UserData, user.Id.ToString())
             };
 
             var extraClaims=_claimService.GetClaims(user.Id);

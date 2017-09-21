@@ -10,6 +10,8 @@ namespace AuthServer.DomainClasses
         public int Id { get; set; }
         public string TitleEng { get; set; }
         public string TitleFa { get; set; }
+        public string IconClass { get; set; }
+        public bool AcceptRequestFrom { get; set; }
 
         public virtual ICollection<Login> Logins { get; set; }
     }

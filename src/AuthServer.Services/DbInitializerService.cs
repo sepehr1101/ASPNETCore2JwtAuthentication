@@ -59,12 +59,29 @@ namespace AuthServer.Services
                     var adminRole = new Role { Name = CustomRoles.Admin };
                     var userRole = new Role { Name = CustomRoles.User };
                     if (!context.Roles.Any())
-                    {
+                    {                       
                         context.Add(adminRole);
                         context.Add(userRole);
-                        context.SaveChanges();
+                        //context.SaveChanges();
                     }
                     
+                    if(!context.Policies.Any())
+                    {
+                        var policy=new Policy
+                        {
+                            EnableValidIpRecaptcha=false,
+                            RequireRecaptchaInvalidAttempts=6,
+                            LockInvalidAttempts=10,
+                            IsActive=true,
+                            MinPasswordLength=4,
+                            PasswordContainsLowercase=false,
+                            PasswordContainsNonAlphaNumeric=false,
+                            PasswordContainsNumber=false,
+                            PasswordContainsUppercase=false
+                        };
+                        context.Add(policy);
+                    }
+
                     // Add Admin user
                     if (!context.Users.Any())
                     {
@@ -81,18 +98,54 @@ namespace AuthServer.Services
                             LastName="شمس" ,
                             JoinTimespan= DateTimeOffset.UtcNow,
                             Email="sepehr@example.com",
-                            EmailConfirmed=false
+                            EmailConfirmed=false,
+                            IncludeThisRecord=true
                         };
-                        context.Add(adminUser);
+                       
                         var adminUserRole=new UserRole { Role = adminRole, User = adminUser };
                         var userUserRole=new UserRole { Role = userRole, User = adminUser };
                         var userRoles=new UserRole[]{adminUserRole,userUserRole};
                         adminUser.UserRoles=userRoles;
 
                         var claim=new UserClaim{ClaimType="zoneId",ClaimValue="131301"};
-                        adminUser.UserClaims=new UserClaim[]{claim};
-                        context.SaveChanges();
+                        adminUser.UserClaims=new UserClaim[]{claim};                       
+                        context.Add(adminUser);                       
                     }
+
+                    if(!context.Browsers.Any())
+                    {
+                        var firefox=new Browser
+                        {
+                            Id=1,
+                            TitleEng="Mozilla FireFox",
+                            TitleFa="موزیلا فایرفاکس",
+                            IconClass="firefox"
+                        };
+                        var chrome=new Browser
+                        {
+                             Id=2,
+                            TitleEng="Google Chrome",
+                            TitleFa="گوگل کروم",
+                            IconClass="chrome"
+                        };
+                        var edge=new Browser
+                        {
+                             Id=3,
+                            TitleEng="Microsoft Edge",
+                            TitleFa="Edge",
+                            IconClass="edge"
+                        };
+                        var ie=new Browser
+                        {
+                             Id=4,
+                            TitleEng="Internet Explorer",
+                            TitleFa="اینترنت اکسپلورر",
+                            IconClass="ie"
+                        };
+                        var browsers=new []{firefox,chrome,edge,ie};
+                        context.AddRange(browsers);
+                    }
+                    context.SaveChanges();
                 }
             }
         }

@@ -22,6 +22,7 @@ namespace AuthServer.DataLayer.Context
         public virtual DbSet<Policy> Policies{get;set;}
         public virtual DbSet<Login> Logins{get;set;}
         public virtual DbSet<Browser> Browsers { get; set; }
+        public virtual DbSet<OS> OSes{get;set;}
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -111,11 +112,24 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.IsActive).IsRequired();
                 entity.Property(e=>e.LockInvalidAttempts).IsRequired();
                 entity.Property(e=>e.RequireRecaptchaInvalidAttempts).IsRequired();
+                entity.Property(e=>e.MinPasswordLength).IsRequired();
+                entity.Property(e=>e.PasswordContainsLowercase).IsRequired();
+                entity.Property(e=>e.PasswordContainsNonAlphaNumeric).IsRequired();
+                entity.Property(e=>e.PasswordContainsNumber).IsRequired();
+                entity.Property(e=>e.PasswordContainsUppercase).IsRequired();
             });
 
              builder.Entity<Browser>(entity =>{
                 entity.Property(e=>e.TitleEng).HasMaxLength(31).IsRequired();
-                entity.Property(e=>e.TitleFa).HasMaxLength(31).IsRequired();                  
+                entity.Property(e=>e.TitleFa).HasMaxLength(31).IsRequired();              
+                entity.Property(e=>e.IconClass).HasMaxLength(31).IsRequired();    
+                entity.Property(e=>e.AcceptRequestFrom).IsRequired();    
+            });
+
+             builder.Entity<OS>(entity =>{
+                entity.Property(e=>e.Title).HasMaxLength(31).IsRequired();
+                entity.Property(e=>e.AcceptRequestFrom).IsRequired();              
+                entity.Property(e=>e.IconClass).HasMaxLength(31).IsRequired();    
             });
 
             builder.Entity<Login>(entity =>{
@@ -124,6 +138,9 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.WasSuccessful).IsRequired();
                 entity.HasOne(e=>e.Browser).WithMany(e=>e.Logins).HasForeignKey(e=>e.BrowserId);
                 entity.HasOne(e=>e.User).WithMany(e=>e.Logins).HasForeignKey(e=>e.UserId);
+                entity.HasOne(e =>e.OS).WithMany(e=>e.Logins).HasForeignKey(e=>e.OsId);
+                entity.Property(e =>e.BrowserVersion).HasMaxLength(31);
+                entity.Property(e=>e.OsVersion).HasMaxLength(31);
             });
         }
     }

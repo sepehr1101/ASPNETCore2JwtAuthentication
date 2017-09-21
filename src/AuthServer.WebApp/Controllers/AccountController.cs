@@ -1,8 +1,10 @@
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthServer.Common;
 using AuthServer.DataLayer.Context;
 using AuthServer.DomainClasses;
+using AuthServer.DomainClasses.ViewModels;
 using AuthServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -17,11 +19,13 @@ namespace AuthServer.WebApp.Controllers
     {
         private readonly IUsersService _usersService;
         private readonly ITokenStoreService _tokenStoreService;
+        private readonly ILoginService _loginService;
         private readonly IUnitOfWork _uow;
 
         public AccountController(
             IUsersService usersService,
             ITokenStoreService tokenStoreService,
+            ILoginService loginService,
             IUnitOfWork uow)
         {
             _usersService = usersService;
@@ -30,27 +34,63 @@ namespace AuthServer.WebApp.Controllers
             _tokenStoreService = tokenStoreService;
             _tokenStoreService.CheckArgumentIsNull(nameof(_tokenStoreService));
 
+            _loginService=loginService;
+            _loginService.CheckArgumentIsNull(nameof(_loginService));
+
             _uow = uow;
             _uow.CheckArgumentIsNull(nameof(_uow));
         }
 
         [AllowAnonymous]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Login([FromBody]  User loginUser)
+        public async Task<IActionResult> Login([FromBody]  LoginInfo loginUser)
         {
+            bool canILogin=false;
             if (loginUser == null)
             {
                 return BadRequest("user is not set.");
-            }
-
+            }         
             var user = await _usersService.FindUserAsync(loginUser.Username, loginUser.Password).ConfigureAwait(false);
-            if (user == null || !user.IsActive)
+            if(user==null)
+            {
+                user=await _usersService.FindUserAsync(loginUser.Username).ConfigureAwait(false);
+                if(user==null)
+                {
+                    return Unauthorized();
+                }
+                var loginFailure = GetLogin(false,user);
+                _loginService.Add(loginFailure);
+                await _uow.SaveChangesAsync().ConfigureAwait(false);
+                return Unauthorized();
+            }
+            canILogin= user != null && user.IsActive;
+            if (!canILogin)
             {
                 return Unauthorized();
             }
 
             var (accessToken, refreshToken) = await _tokenStoreService.CreateJwtTokens(user).ConfigureAwait(false);
+            var loginSuccess = GetLogin(canILogin,user);
+            _loginService.Add(loginSuccess);
+            await _uow.SaveChangesAsync().ConfigureAwait(false);
             return Ok(new { access_token = accessToken, refresh_token = refreshToken });
+        }
+
+        private Login GetLogin(bool canILogin,User user)
+        {
+            var login=new Login();
+            var userAgent=Request.Headers["User-Agent"]; 
+            UserAgent.UserAgent ua = new UserAgent.UserAgent(userAgent); 
+            //login.BrowserId=ua.Browser.BrowserCode;
+            login.BrowserVersion=ua.Browser.Version;
+            login.Id=Guid.NewGuid();
+            login.LoginIP="";
+            login.LoginTimespan=DateTimeOffset.UtcNow;
+            login.User=user;
+            login.OsVersion=ua.OS.Version;
+            login.WasSuccessful=canILogin;
+
+            return login;
         }
 
         [AllowAnonymous]
