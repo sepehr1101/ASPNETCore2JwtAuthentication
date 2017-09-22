@@ -11,9 +11,17 @@ namespace AuthServer.Services
 {
     public interface IRolesService
     {
+        /// <summary>
+        /// Get All Roles
+        /// </summary>
+        /// <returns>ICollection<Role></returns>
+        Task<ICollection<Role>> GetAsync();
+        Task<Role> GetAsync(int roleId);
         Task<List<Role>> FindUserRolesAsync(Guid userId);
         Task<bool> IsUserInRole(Guid userId, string roleName);
         Task<List<User>> FindUsersInRoleAsync(string roleName);
+        Task<List<User>> FindUsersInRoleAsync(int roleId);
+        Task AddAsync(Role role);
     }
 
     public class RolesService : IRolesService
@@ -46,7 +54,7 @@ namespace AuthServer.Services
             var userRolesQuery = from role in _roles
                                  where role.Name == roleName
                                  from user in role.UserRoles
-                                 where user.UserId == userId
+                                 where user.UserId == userId 
                                  select role;
             var userRole = await userRolesQuery.FirstOrDefaultAsync().ConfigureAwait(false);
             return userRole != null;
@@ -55,11 +63,38 @@ namespace AuthServer.Services
         public Task<List<User>> FindUsersInRoleAsync(string roleName)
         {
             var roleUserIdsQuery = from role in _roles
-                                   where role.Name == roleName
+                                   where role.Name == roleName && role.IsActive
                                    from user in role.UserRoles
                                    select user.UserId;
-            return _users.Where(user => roleUserIdsQuery.Contains(user.Id))
+            return _users.Where(user => roleUserIdsQuery.Contains(user.Id) && user.IncludeThisRecord)
                          .ToListAsync();
+        }
+         public Task<List<User>> FindUsersInRoleAsync(int roleId)
+        {
+            var roleUserIdsQuery = from role in _roles
+                                   where role.Id == roleId && role.IsActive
+                                   from user in role.UserRoles
+                                   select user.UserId;
+            return _users.Where(user => roleUserIdsQuery.Contains(user.Id) && user.IncludeThisRecord)
+                         .ToListAsync();
+        }
+
+        public async Task<Role> GetAsync(int roleId)
+        {
+            var role=await _roles.FirstOrDefaultAsync(r => r.IsActive && r.Id==roleId)
+                .ConfigureAwait(false);
+            return  role;
+        }
+        public async Task<ICollection<Role>> GetAsync()
+        {
+            var roles=await _roles.Where(r => r.IsActive)
+                .ToListAsync().ConfigureAwait(false);
+            return roles;
+        }
+
+        public async Task AddAsync(Role role)
+        {  
+            await _roles.AddAsync(role).ConfigureAwait(false);
         }
     }
 }

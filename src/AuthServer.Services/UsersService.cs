@@ -12,6 +12,7 @@ namespace AuthServer.Services
     public interface IUsersService
     {
         Task<string> GetSerialNumberAsync(Guid userId);
+        Task<string> ChangeSerialNuberAsync(Guid userId);
         Task<User> FindUserAsync(string username, string password);
         Task<User> FindUserAsync(Guid userId);
         Task<User> FindUserAsync(string username);
@@ -43,11 +44,14 @@ namespace AuthServer.Services
         public Task<User> FindUserAsync(string username, string password)
         {
             var passwordHash = _securityService.GetSha256Hash(password.Trim());
-            return _users.FirstOrDefaultAsync(x => x.Username == username && x.Password == passwordHash);
+            return _users.FirstOrDefaultAsync(x =>
+             x.Username == username &&
+             x.Password == passwordHash );
         }
         public async Task<User> FindUserAsync(string username)
         {
-            var user=await _users.FirstOrDefaultAsync(u => u.Username.Trim()==username.Trim()).ConfigureAwait(false);
+            var user=await _users.FirstOrDefaultAsync(u => 
+                u.Username.Trim()==username.Trim() && u.IncludeThisRecord).ConfigureAwait(false);
             return user;
         }
 
@@ -55,6 +59,13 @@ namespace AuthServer.Services
         {
             var user = await FindUserAsync(userId).ConfigureAwait(false);
             return user.SerialNumber;
+        }
+        public async Task<string> ChangeSerialNuberAsync(Guid userId)
+        {
+            var user=await FindUserAsync(userId).ConfigureAwait(false);
+            var newSerialNumber=Guid.NewGuid().ToString("N");
+            user.SerialNumber=newSerialNumber;
+            return newSerialNumber;
         }
       
         public async Task UpdateUserLastActivityDateAsync(Guid userId)

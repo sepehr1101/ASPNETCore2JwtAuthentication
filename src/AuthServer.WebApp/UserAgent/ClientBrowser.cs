@@ -14,7 +14,7 @@ namespace AuthServer.WebApp.UserAgent
 
         public string Version { get; set; }
 
-        public int BrowserCode { get; set; }
+        public int? BrowserCode { get; set; }
 
         private static Dictionary<string, string> _versionMap = new Dictionary<string, string>{
             {"/8","1.0" },
@@ -36,11 +36,8 @@ namespace AuthServer.WebApp.UserAgent
                     if (regexItem.IsMatch(userAgent))
                     {
                         var match = regexItem.Match(userAgent);
-
                         matchItem.Action(match, this);
-
                         this.Major = new Regex(@"\d*").Match(this.Version).Value;
-
                         return;
                     }
                 }

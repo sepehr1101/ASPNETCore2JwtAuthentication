@@ -12,6 +12,8 @@ namespace AuthServer.DomainClasses
         public int? OsId { get; set; }
         public string BrowserVersion { get; set; }
         public string OsVersion { get; set; }
+        public string OsTitle { get; set; }        
+        public string BrowserTitle { get; set; }
 
         public virtual Browser Browser { get; set; }
         public virtual User User{get;set;}

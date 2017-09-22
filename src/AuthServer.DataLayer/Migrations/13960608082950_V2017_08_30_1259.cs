@@ -15,7 +15,9 @@ namespace AuthServer.DataLayer.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    TitleFa=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
+                    IsActive=table.Column<bool>(type:"bit",nullable:false)
                 },
                 constraints: table =>
                 {
@@ -104,7 +106,10 @@ namespace AuthServer.DataLayer.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(MAX)", nullable: true)
+                    ClaimValue = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    IsActive=table.Column<bool>(type:"bit",nullable:false),
+                    InsertBy=table.Column<Guid>(type:"uniqueidentifier",nullable:false),                   
+                    InsertTimespan=table.Column<DateTimeOffset>(type:"datetimeoffset",nullable:false)
                 },
                 constraints: table =>
                 {
@@ -262,7 +267,9 @@ namespace AuthServer.DataLayer.Migrations
                     WasSuccessful = table.Column<bool>(type: "bit", nullable: false),
                     OsId=table.Column<int>(type:"int",nullable:true),
                     BrowserVersion=table.Column<string>(type:"nvarchar(31)",nullable:true),
-                    OsVersion=table.Column<string>(type:"nvarchar(31)",nullable:true)
+                    OsVersion=table.Column<string>(type:"nvarchar(31)",nullable:true),
+                    OsTitle=table.Column<string>(type:"nvarchar(31)",nullable:true),
+                    BrowserTitle=table.Column<string>(type:"nvarchar(31)",nullable:true)
                 },
                 constraints: table =>
                 {

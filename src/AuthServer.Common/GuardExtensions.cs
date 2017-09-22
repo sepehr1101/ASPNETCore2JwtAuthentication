@@ -12,5 +12,11 @@ namespace AuthServer.Common
             if (o == null)
                 throw new ArgumentNullException(name);
         }
+
+        public static void CheckStringIsNullOrWhiteSpace(this string str)
+        {
+            if(String.IsNullOrWhiteSpace(str))
+                throw new ArgumentException(String.Concat(str ," is Null"));
+        }
     }
 }

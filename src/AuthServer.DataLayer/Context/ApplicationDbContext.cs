@@ -55,6 +55,8 @@ namespace AuthServer.DataLayer.Context
             builder.Entity<Role>(entity =>
             {
                 entity.Property(e => e.Name).HasMaxLength(450).IsRequired();
+                entity.Property(e =>e.TitleFa).HasMaxLength(450).IsRequired();
+                entity.Property(e=>e.IsActive).IsRequired();
                 entity.HasIndex(e => e.Name).IsUnique();
             });
 
@@ -76,6 +78,9 @@ namespace AuthServer.DataLayer.Context
             builder.Entity<UserClaim>(entity=>{
                 entity.HasIndex(e=>e.UserId);
                 entity.HasOne(e=>e.User).WithMany(e=>e.UserClaims).HasForeignKey(e=>e.UserId);
+                entity.Property(e => e.IsActive).IsRequired();
+                entity.Property(e=>e.InsertBy).IsRequired();
+                entity.Property(e=>e.InsertTimespan).IsRequired();
             });
 
             builder.Entity<AuthLeve1>(entity=>{
@@ -141,6 +146,8 @@ namespace AuthServer.DataLayer.Context
                 entity.HasOne(e =>e.OS).WithMany(e=>e.Logins).HasForeignKey(e=>e.OsId);
                 entity.Property(e =>e.BrowserVersion).HasMaxLength(31);
                 entity.Property(e=>e.OsVersion).HasMaxLength(31);
+                entity.Property(e =>e.OsTitle).HasMaxLength(31);
+                entity.Property(e =>e.BrowserTitle).HasMaxLength(31);
             });
         }
     }

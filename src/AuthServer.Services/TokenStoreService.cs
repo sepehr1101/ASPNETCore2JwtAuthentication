@@ -139,8 +139,7 @@ namespace AuthServer.Services
             var refreshToken = Guid.NewGuid().ToString().Replace("-", "");
 
             await AddUserTokenAsync(user, refreshToken, accessToken, refreshTokenExpiresDateTime, accessTokenExpiresDateTime).ConfigureAwait(false);
-            //await _uow.SaveChangesAsync().ConfigureAwait(false);
-
+          
             return (accessToken, refreshToken);
         }
 

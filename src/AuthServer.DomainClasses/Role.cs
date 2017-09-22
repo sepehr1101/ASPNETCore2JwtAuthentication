@@ -11,6 +11,8 @@ namespace AuthServer.DomainClasses
 
         public int Id { get; set; }
         public string Name { get; set; }
+        public string TitleFa { get; set; }
+        public bool IsActive { get; set; }
 
         public virtual ICollection<UserRole> UserRoles { get; set; }
     }

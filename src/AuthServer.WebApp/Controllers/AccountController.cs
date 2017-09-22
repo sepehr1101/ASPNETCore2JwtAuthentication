@@ -9,6 +9,7 @@ using AuthServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.Features;
 using Newtonsoft.Json.Linq;
 
 namespace AuthServer.WebApp.Controllers
@@ -81,13 +82,15 @@ namespace AuthServer.WebApp.Controllers
             var login=new Login();
             var userAgent=Request.Headers["User-Agent"]; 
             UserAgent.UserAgent ua = new UserAgent.UserAgent(userAgent); 
-            //login.BrowserId=ua.Browser.BrowserCode;
+            login.BrowserId=ua.Browser.BrowserCode;
             login.BrowserVersion=ua.Browser.Version;
+            login.BrowserTitle=ua.Browser.Name;
             login.Id=Guid.NewGuid();
-            login.LoginIP="";
+            login.LoginIP=HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress?.ToString();
             login.LoginTimespan=DateTimeOffset.UtcNow;
             login.User=user;
             login.OsVersion=ua.OS.Version;
+            login.OsTitle=ua.OS.Name;
             login.WasSuccessful=canILogin;
 
             return login;

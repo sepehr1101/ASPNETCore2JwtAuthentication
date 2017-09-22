@@ -56,8 +56,8 @@ namespace AuthServer.Services
                 using (var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>())
                 {
                     // Add default roles
-                    var adminRole = new Role { Name = CustomRoles.Admin };
-                    var userRole = new Role { Name = CustomRoles.User };
+                    var adminRole = new Role { Name = CustomRoles.Admin,TitleFa="مدیر سیستم",IsActive=true };
+                    var userRole = new Role { Name = CustomRoles.User,TitleFa="کاربر",IsActive=true };
                     if (!context.Roles.Any())
                     {                       
                         context.Add(adminRole);
@@ -107,7 +107,8 @@ namespace AuthServer.Services
                         var userRoles=new UserRole[]{adminUserRole,userUserRole};
                         adminUser.UserRoles=userRoles;
 
-                        var claim=new UserClaim{ClaimType="zoneId",ClaimValue="131301"};
+                        var claim=new UserClaim{ClaimType="zoneId",ClaimValue="131301",InsertBy=adminUser.Id,
+                            InsertTimespan=DateTimeOffset.UtcNow};
                         adminUser.UserClaims=new UserClaim[]{claim};                       
                         context.Add(adminUser);                       
                     }
