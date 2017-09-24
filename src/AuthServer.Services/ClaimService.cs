@@ -5,6 +5,7 @@ using AuthServer.DomainClasses;
 using AuthServer.DataLayer.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq; 
+using System.Threading.Tasks;
 
 namespace AuthServer.Services
 {

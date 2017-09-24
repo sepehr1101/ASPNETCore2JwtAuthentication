@@ -1,5 +1,13 @@
 using AuthServer.DomainClasses;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Reflection;
+
 
 namespace AuthServer.DataLayer.Context
 {
@@ -15,10 +23,10 @@ namespace AuthServer.DataLayer.Context
         public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<UserToken> UserTokens { get; set; }
         public virtual DbSet<UserClaim> UserClaims{get;set;}
-        public virtual DbSet<AuthLeve1> AuthLevel1s{get;set;}
-        public virtual DbSet<AuthLeve2> AuthLevel2s{get;set;}
-        public virtual DbSet<AuthLeve3> AuthLevel3s{get;set;}
-        public virtual DbSet<AuthLeve4> AuthLevel4s{get;set;}
+        public virtual DbSet<AuthLevel1> AuthLevel1s{get;set;}
+        public virtual DbSet<AuthLevel2> AuthLevel2s{get;set;}
+        public virtual DbSet<AuthLevel3> AuthLevel3s{get;set;}
+        public virtual DbSet<AuthLevel4> AuthLevel4s{get;set;}
         public virtual DbSet<Policy> Policies{get;set;}
         public virtual DbSet<Login> Logins{get;set;}
         public virtual DbSet<Browser> Browsers { get; set; }
@@ -83,19 +91,19 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.InsertTimespan).IsRequired();
             });
 
-            builder.Entity<AuthLeve1>(entity=>{
+            builder.Entity<AuthLevel1>(entity=>{
                 entity.Property(e=>e.AppBoundaryTitle).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.AppBoundaryCode).IsRequired();
             });
 
-            builder.Entity<AuthLeve2>(entity=>{
+            builder.Entity<AuthLevel2>(entity=>{
                 entity.Property(e=>e.ElementId).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.IconClass).IsRequired();
                 entity.Property(e=>e.Title).HasMaxLength(255).IsRequired();
                 entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLeve1Id);
             });
 
-             builder.Entity<AuthLeve3>(entity=>{
+             builder.Entity<AuthLevel3>(entity=>{
                 entity.Property(e=>e.ElementId).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.Action).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.Controller).HasMaxLength(255).IsRequired();
@@ -103,13 +111,13 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.Parameters).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.PreRoute).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.Title).HasMaxLength(255).IsRequired();
-                entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLeve2Id);
+                entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLevel2Id);
             });
 
-              builder.Entity<AuthLeve4>(entity=>{
+              builder.Entity<AuthLevel4>(entity=>{
                 entity.Property(e=>e.Title).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.Value).IsRequired();
-                entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLeve3Id);
+                entity.HasOne(e=>e.Parent).WithMany(e=>e.Children).HasForeignKey(e=>e.AuthLevel3Id);
             });
 
             builder.Entity<Policy>(entity =>{
@@ -149,6 +157,43 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e =>e.OsTitle).HasMaxLength(31);
                 entity.Property(e =>e.BrowserTitle).HasMaxLength(31);
             });
+        }
+
+        public DatabaseFacade GetDatabase()
+        {
+            return this.Database;
+        }
+
+       public List<T> ExecSQL<T>(string query)
+       {
+            var database=GetDatabase();            
+            using (var command = database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = query;
+                command.CommandType = CommandType.Text;
+                database.OpenConnection();
+
+                using (var result = command.ExecuteReader())
+                {
+                    List<T> list = new List<T>();
+                    T obj = default(T);
+                    while (result.Read())
+                    {
+                        obj = Activator.CreateInstance<T>();
+                        foreach (PropertyInfo prop in obj.GetType().GetProperties())
+                        {
+                            if (!object.Equals(result[prop.Name], DBNull.Value))
+                            {
+                                prop.SetValue(obj, result[prop.Name], null);
+                            }
+                        }
+                        list.Add(obj);
+                    }
+                    return list;
+                
+                }
+            }
+            
         }
     }
 }

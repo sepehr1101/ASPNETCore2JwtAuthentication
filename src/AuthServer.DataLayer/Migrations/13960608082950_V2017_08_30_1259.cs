@@ -123,13 +123,13 @@ namespace AuthServer.DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuthLevel1",
+                name: "AuthLevel1s",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     AppBoundaryCode = table.Column<int>(type: "int", nullable: false),
-                    AppBoundaryTitle = table.Column<int>(type: "nvarchar(255)", nullable: false),
+                    AppBoundaryTitle = table.Column<string>(type: "nvarchar(255)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -137,41 +137,41 @@ namespace AuthServer.DataLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuthLevel2",
+                name: "AuthLevel2s",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    AuthLeve1Id = table.Column<int>(type: "int", nullable: false),
-                    IconClass = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    Title = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    ElementId = table.Column<int>(type: "nvarchar(255)", nullable: false),
+                    AuthLevel1Id = table.Column<int>(type: "int", nullable: false),
+                    IconClass = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    ElementId = table.Column<string>(type: "nvarchar(255)", nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AuthLevel2", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AuthLevel1_AuthLevel2_AuthLevel1Id",
-                        column: x => x.AuthLeve1Id,
-                        principalTable: "AuthLevel1",
+                        column: x => x.AuthLevel1Id,
+                        principalTable: "AuthLevel1s",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuthLevel3",
+                name: "AuthLevel3s",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     AuthLevel2Id = table.Column<int>(type: "int", nullable: false),
-                    Domain = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    PreRoute = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    Parameters = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    Controller = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    Action = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    Title = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    ElementId = table.Column<int>(type: "nvarchar(255)", nullable: false),
+                    Domain = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    PreRoute = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Parameters = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Controller = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    ElementId = table.Column<string>(type: "nvarchar(255)", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -179,20 +179,20 @@ namespace AuthServer.DataLayer.Migrations
                     table.ForeignKey(
                         name: "FK_AuthLevel2_AuthLevel3_AuthLevel2Id",
                         column: x => x.AuthLevel2Id,
-                        principalTable: "AuthLevel2",
+                        principalTable: "AuthLevel2s",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuthLevel4",
+                name: "AuthLevel4s",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     AuthLevel3Id = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<int>(type: "nvarchar(255)", nullable: false),
-                    Value = table.Column<int>(type: "nvarchar(255)", nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(255)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -200,7 +200,7 @@ namespace AuthServer.DataLayer.Migrations
                     table.ForeignKey(
                         name: "FK_AuthLevel3_AuthLevel4_AuthLevel3Id",
                         column: x => x.AuthLevel3Id,
-                        principalTable: "AuthLevel3",
+                        principalTable: "AuthLevel3s",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });

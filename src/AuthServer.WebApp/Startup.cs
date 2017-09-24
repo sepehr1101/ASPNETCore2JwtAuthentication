@@ -41,6 +41,7 @@ namespace AuthServer.WebApp
             services.AddScoped<ITokenValidatorService, TokenValidatorService>();
             services.AddScoped<IClaimService,ClaimService>();
             services.AddScoped<ILoginService,LoginService>();
+            services.AddScoped<IAuthLevelService,AuthLevelService>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {

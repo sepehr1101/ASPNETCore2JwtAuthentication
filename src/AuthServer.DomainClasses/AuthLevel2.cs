@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace AuthServer.DomainClasses
 {
-    public class AuthLeve2
+    public class AuthLevel2
     {
-        public AuthLeve2()
+        public AuthLevel2()
         {           
-           Children=new HashSet<AuthLeve3>();
+           Children=new HashSet<AuthLevel3>();
         }
 
         public int Id { get; set; }
@@ -16,7 +16,7 @@ namespace AuthServer.DomainClasses
         public string Title { get; set; }
         public string ElementId { get; set; }
 
-        public virtual AuthLeve1 Parent { get; set; }
-        public virtual ICollection<AuthLeve3> Children { get; set; }
+        public virtual AuthLevel1 Parent { get; set; }
+        public virtual ICollection<AuthLevel3> Children { get; set; }
     }
 }
