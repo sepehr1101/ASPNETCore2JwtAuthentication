@@ -17,6 +17,8 @@ namespace AuthServer.Services
         Task<User> FindUserAsync(Guid userId);
         Task<User> FindUserAsync(string username);
         Task UpdateUserLastActivityDateAsync(Guid userId);
+
+        Task RegisterUser(User user);
     }
 
     public class UsersService : IUsersService
@@ -83,6 +85,11 @@ namespace AuthServer.Services
             }
             user.LastLoggedIn = DateTimeOffset.UtcNow;
             await _uow.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async Task RegisterUser(User user)
+        {
+            await _users.AddAsync(user);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace AuthServer.WebApp
                             config.SetBasePath(env.ContentRootPath);
                             config.AddInMemoryCollection(new[]
                                 {
-                                                new KeyValuePair<string,string>("the-key", "the-value")
+                                    new KeyValuePair<string,string>("the-key", "the-value")
                                 })
                                 .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
                                 .AddJsonFile($"appsettings.{env}.json", optional: true)
@@ -34,11 +34,13 @@ namespace AuthServer.WebApp
                             logging.AddDebug();
                             logging.AddConsole();
                         })
+                        .UseSetting("detailedErrors", "true")
+                        .CaptureStartupErrors(true)
                         .UseIISIntegration()
                         .UseDefaultServiceProvider((context, options) =>
                         {
-                            options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
-                        })
+                            options.ValidateScopes = context.HostingEnvironment.IsDevelopment();//IsDevelopment()//IsProduction()
+                        })                        
                         .UseStartup<Startup>()
                         .Build();
             host.Run();

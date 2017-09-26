@@ -14,6 +14,12 @@ namespace AuthServer.DataLayer.Context
         int SaveChanges();
         Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken());
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// to execute raw sql query , this is temporary until the next relase of .netCore
+        /// </summary>
+        /// <param name="query">raw query</param>
+        /// <returns>List of T</returns>
         List<T> ExecSQL<T>(string query);
 
     }
