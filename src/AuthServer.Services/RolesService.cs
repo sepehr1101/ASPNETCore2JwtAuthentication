@@ -22,6 +22,7 @@ namespace AuthServer.Services
         Task<List<User>> FindUsersInRoleAsync(string roleName);
         Task<List<User>> FindUsersInRoleAsync(int roleId);
         Task AddAsync(Role role);
+        ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds);
     }
 
     public class RolesService : IRolesService
@@ -29,6 +30,7 @@ namespace AuthServer.Services
         private readonly IUnitOfWork _uow;
         private readonly DbSet<Role> _roles;
         private readonly DbSet<User> _users;
+        private readonly DbSet<UserRole> _userRoles;
 
         public RolesService(IUnitOfWork uow)
         {
@@ -37,6 +39,7 @@ namespace AuthServer.Services
 
             _roles = _uow.Set<Role>();
             _users = _uow.Set<User>();
+            _userRoles = _uow.Set<UserRole>();
         }
 
         public Task<List<Role>> FindUserRolesAsync(System.Guid userId)
@@ -95,6 +98,22 @@ namespace AuthServer.Services
         public async Task AddAsync(Role role)
         {  
             await _roles.AddAsync(role).ConfigureAwait(false);
+        }
+
+        public ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds)
+        {
+            var userRoles=new List<UserRole>();
+            if(roleIds==null || roleIds.Count<1)
+            {
+                foreach(var roleId in roleIds)
+                {
+                    var userRole=new UserRole();
+                    userRole.RoleId=roleId;
+                    userRoles.Add(userRole);
+                }
+                return userRoles;
+            }
+            return null;
         }
     }
 }

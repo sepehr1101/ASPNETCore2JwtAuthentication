@@ -13,6 +13,7 @@ namespace AuthServer.Services
     {
         void Add (Guid userId,string claimType, string claimValue);
         ICollection<Claim> GetClaims (Guid userId);
+        List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy);
     }
     public class ClaimService : IClaimService 
     {
@@ -38,6 +39,21 @@ namespace AuthServer.Services
             var query=_userClaims.Where(u=>u.UserId==userId)
                 .Select(x=>new Claim(x.ClaimType,x.ClaimValue));
             return query.ToList();
+        }
+
+        public List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy)
+        {
+            var claims=new List<UserClaim>();
+            if(claimValues!=null && claimValues.Count>0)
+            {
+                foreach(var claimValue in claimValues)
+                {
+                    var claim=new UserClaim(claimType,claimValue,insertedBy);
+                    claims.Add(claim);
+                }
+                return claims;
+            }
+            return null;
         }
     }
 }

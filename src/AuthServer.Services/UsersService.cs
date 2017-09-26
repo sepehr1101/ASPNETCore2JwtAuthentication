@@ -6,6 +6,7 @@ using AuthServer.Common;
 using AuthServer.DataLayer.Context;
 using AuthServer.DomainClasses;
 using Microsoft.EntityFrameworkCore;
+using AuthServer.DomainClasses.ViewModels;
 
 namespace AuthServer.Services
 {
@@ -18,7 +19,7 @@ namespace AuthServer.Services
         Task<User> FindUserAsync(string username);
         Task UpdateUserLastActivityDateAsync(Guid userId);
 
-        Task RegisterUser(User user);
+        Task RegisterUserAsync(User user);
     }
 
     public class UsersService : IUsersService
@@ -87,8 +88,9 @@ namespace AuthServer.Services
             await _uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task RegisterUser(User user)
+        public async Task RegisterUserAsync(User user)
         {
+            _securityService.GetSha256Hash(user.Password.Trim());
             await _users.AddAsync(user);
         }
     }

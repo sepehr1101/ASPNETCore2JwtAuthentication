@@ -40,7 +40,7 @@ namespace AuthServer.DataLayer.Context
             // Custom application mappings
             BuildUserModel(builder);
             BuildRoleModel(builder);
-            BuildUserModel(builder);    
+            BuildUserRoleModel(builder);    
             BuildUserTokenModel(builder);
             BuildUserClaimModel(builder);
             BuildAuthLevel1Model(builder);

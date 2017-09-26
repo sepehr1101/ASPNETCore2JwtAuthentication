@@ -11,5 +11,16 @@ namespace AuthServer.DomainClasses
         public Guid InsertBy { get; set; }
         public DateTimeOffset InsertTimespan { get; set; }
         public User User { get; set; }
+
+        public UserClaim()
+        {            
+        }
+        public UserClaim(string claimType,string claimValue, Guid insertBy)
+        {
+            ClaimType=claimType;
+            ClaimValue=claimValue;
+            IsActive=true;
+            InsertBy=insertBy;
+        }
     }
 }
