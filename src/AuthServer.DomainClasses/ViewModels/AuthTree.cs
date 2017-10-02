@@ -18,6 +18,10 @@ namespace AuthServer.DomainClasses.ViewModels
     }
     public class A3 :BaseA
     {
+        public string PreRoute { get; set; }
+        public string Controller { get; set; }
+        public string Action { get; set; }
+        public string Parameters { get; set; }
         public ICollection<A4> A4s { get; set; }
     }
     public class A4:BaseA

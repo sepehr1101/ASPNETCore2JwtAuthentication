@@ -14,19 +14,21 @@ using Newtonsoft.Json.Linq;
 
 namespace AuthServer.WebApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [EnableCors("CorsPolicy")]
     public class AccountController : Controller
     {
         private readonly IUsersService _usersService;
         private readonly ITokenStoreService _tokenStoreService;
         private readonly ILoginService _loginService;
+        private readonly IAuthLevelService _authLevelService;
         private readonly IUnitOfWork _uow;
 
         public AccountController(
             IUsersService usersService,
             ITokenStoreService tokenStoreService,
             ILoginService loginService,
+            IAuthLevelService authLevelService,
             IUnitOfWork uow)
         {
             _usersService = usersService;
@@ -38,6 +40,9 @@ namespace AuthServer.WebApp.Controllers
             _loginService=loginService;
             _loginService.CheckArgumentIsNull(nameof(_loginService));
 
+            _authLevelService=authLevelService;
+            _authLevelService.CheckArgumentIsNull(nameof(_authLevelService));
+
             _uow = uow;
             _uow.CheckArgumentIsNull(nameof(_uow));
         }
@@ -45,7 +50,7 @@ namespace AuthServer.WebApp.Controllers
         [AllowAnonymous]
         [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody]  LoginInfo loginUser)
-        {
+        {           
             bool canILogin=false;
             if (loginUser == null)
             {
@@ -69,12 +74,12 @@ namespace AuthServer.WebApp.Controllers
             {
                 return Unauthorized();
             }
-
+            var accessList=await _authLevelService.GetMyAccessListAsync(user.Id);
             var (accessToken, refreshToken) = await _tokenStoreService.CreateJwtTokens(user).ConfigureAwait(false);
             var loginSuccess = GetLogin(canILogin,user);
             _loginService.Add(loginSuccess);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
-            return Ok(new { access_token = accessToken, refresh_token = refreshToken });
+            return Ok(new { access_token = accessToken, refresh_token = refreshToken,accessList=accessList });
         }
 
         private Login GetLogin(bool canILogin,User user)

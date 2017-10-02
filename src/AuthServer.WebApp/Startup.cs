@@ -79,6 +79,7 @@ namespace AuthServer.WebApp
                     {
                         ValidIssuer = Configuration["BearerTokens:Issuer"],
                         ValidAudience = Configuration["BearerTokens:Audience"],
+                        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["BearerTokens:Key"])),
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["BearerTokens:Key"])),
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,

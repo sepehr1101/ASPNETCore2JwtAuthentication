@@ -3,6 +3,7 @@ using System.Linq;
 using AuthServer.Common;
 using AuthServer.DataLayer.Context;
 using AuthServer.DomainClasses;
+using AuthServer.DomainClasses.ConstantTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -88,14 +89,15 @@ namespace AuthServer.Services
                         var adminUser = new User
                         {
                             Id=Guid.NewGuid(),
-                            Username = "sepehr",
-                            DisplayName = "تست",
+                            Username = "sysAdmin",
+                            UserCode=256,
+                            DisplayName = "مدیر سیستم",
                             IsActive = true,
                             LastLoggedIn = null,
                             Password = _securityService.GetSha256Hash("123456"),
                             SerialNumber = Guid.NewGuid().ToString("N"),
-                            FirstName="سپهر" ,
-                            LastName="شمس" ,
+                            FirstName="مدیر" ,
+                            LastName="سیستم" ,
                             JoinTimespan= DateTimeOffset.UtcNow,
                             Email="sepehr@example.com",
                             EmailConfirmed=false,
@@ -107,7 +109,8 @@ namespace AuthServer.Services
                         var userRoles=new UserRole[]{adminUserRole,userUserRole};
                         adminUser.UserRoles=userRoles;
 
-                        var claim=new UserClaim{ClaimType="zoneId",ClaimValue="131301",InsertBy=adminUser.Id,
+                        var claim=new UserClaim{ClaimType=CustomClaimTypes.Action,
+                            ClaimValue="",InsertBy=adminUser.Id,
                             InsertTimespan=DateTimeOffset.UtcNow};
                         adminUser.UserClaims=new UserClaim[]{claim};                       
                         context.Add(adminUser);                       

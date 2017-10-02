@@ -14,9 +14,9 @@ using Newtonsoft.Json.Linq;
 
 namespace AuthServer.WebApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [EnableCors("CorsPolicy")]
-    public class AuthLevelsController : Controller
+    public class AuthLevelsController : BaseController
     {
         private readonly IAuthLevelService _authLevelService;
         private readonly IUnitOfWork _uow;
@@ -32,11 +32,11 @@ namespace AuthServer.WebApp.Controllers
             _uow.CheckArgumentIsNull(nameof(_uow));
         }
 
-        [HttpGet]
+        [HttpGet]      
         public async Task<IActionResult> GetAuthLevels()
-        {
+        {           
             var authTree=await _authLevelService.GetAuthLevelsAsync();
             return Ok(authTree);
-        }
+        }        
     }
 }

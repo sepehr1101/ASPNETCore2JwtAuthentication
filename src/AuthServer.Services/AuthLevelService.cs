@@ -14,6 +14,7 @@ namespace AuthServer.Services
     public interface IAuthLevelService
     {
         Task<ICollection<A1>> GetAuthLevelsAsync();
+        Task<ICollection<A1>> GetMyAccessListAsync(Guid userId);
     }
     public class AuthLevelService : IAuthLevelService 
     {
@@ -43,7 +44,7 @@ namespace AuthServer.Services
             return authTree;
         }
 
-        public ICollection<A1> GetAuthTree(ICollection<AuthSummary> authSummary)
+        private ICollection<A1> GetAuthTree(ICollection<AuthSummary> authSummary)
         {
             ICollection<A1> a1s=new List<A1>();
             var a1Ids=authSummary.Select(a =>a._1Id).Distinct().ToList();
@@ -71,6 +72,10 @@ namespace AuthServer.Services
                         var a3=new A3();
                         a3.Id=a3First._3Id;
                         a3.Title=a3First._3Title;
+                        a3.PreRoute=a3First.PreRoute;
+                        a3.Controller=a3First.Controller;
+                        a3.Action=a3First.Action;
+                        a3.Parameters=a3.Parameters;
                         ICollection<A4> a4s=new List<A4>();
                         var a4Ids=authSummary
                             .Where(a =>a._1Id==a1Id && a._2Id==a2Id && a._3Id==a3Id).Select(a => a._4Id).Distinct().ToList();
@@ -94,30 +99,69 @@ namespace AuthServer.Services
             }
             return a1s;
         }
-    
-    
-      private string GetAuthSummaryQuery()
-      {
-          var query=@"select 
-            a1.Id as _1Id,
-            a2.Id as _2Id,
-            a3.Id as _3Id,
-            a4.Id as _4Id,
-            a1.AppBoundaryTitle as _1Title,	
-            a2.Title as _2Title,
-            a3.Title as _3Title,
-            a4.Title as _4Title,
-            a2.IconClass,
-            a4.Value as ClaimValue
-            from AuthLevel1s a1
-            join AuthLevel2s a2
-            on a1.Id=a2.AuthLevel1Id
-            join AuthLevel3s a3
-            on a2.Id=a3.AuthLevel2Id
-            join AuthLevel4s a4
-            on a3.Id=a4.AuthLevel3Id";
-            return query;
-      }
+        private string GetAuthSummaryQuery()
+        {
+            var query=@"select 
+                a1.Id as _1Id,
+                a2.Id as _2Id,
+                a3.Id as _3Id,
+                a4.Id as _4Id,
+                a1.AppBoundaryTitle as _1Title,	
+                a2.Title as _2Title,
+                a3.Title as _3Title,
+                a4.Title as _4Title,
+                a2.IconClass,
+				a3.PreRoute PreRoute,
+				a3.Controller Controller,
+				a3.Action Action,
+				a3.Parameters Parameters,
+                a4.Value as ClaimValue
+                from AuthLevel1s a1
+                join AuthLevel2s a2
+                on a1.Id=a2.AuthLevel1Id
+                join AuthLevel3s a3
+                on a2.Id=a3.AuthLevel2Id
+                join AuthLevel4s a4
+                on a3.Id=a4.AuthLevel3Id";
+                return query;
+        }
 
+        public async Task<ICollection<A1>> GetMyAccessListAsync(Guid userId)
+        {
+            var query=GetAccessListQuery(userId);
+            var authSummeryList=_uow.ExecSQL<AuthSummary>(query);
+            var authTree=GetAuthTree(authSummeryList);
+            return authTree;
+        }
+        private string GetAccessListQuery(Guid userId)
+        {
+            var query=@"select 
+                a1.Id as _1Id,
+                a2.Id as _2Id,
+                a3.Id as _3Id,
+                a4.Id as _4Id,
+                a1.AppBoundaryTitle as _1Title,	
+                a2.Title as _2Title,
+                a3.Title as _3Title,
+                a4.Title as _4Title,
+                a2.IconClass,                
+				a3.PreRoute PreRoute,
+				a3.Controller Controller,
+				a3.Action Action,
+				a3.Parameters Parameters,
+                a4.Value as ClaimValue
+                from AuthLevel1s a1
+                join AuthLevel2s a2
+                on a1.Id=a2.AuthLevel1Id
+                join AuthLevel3s a3
+                on a2.Id=a3.AuthLevel2Id
+                join AuthLevel4s a4
+                on a3.Id=a4.AuthLevel3Id
+				join UserClaims u
+				on LTRIM(RTRIM(a4.Value))=LTRIM(RTRIM(u.ClaimValue)) and
+				u.UserId='{0}'";
+            var completedQuery=String.Format(query,userId);
+            return completedQuery;            
+        }
     }    
 }
