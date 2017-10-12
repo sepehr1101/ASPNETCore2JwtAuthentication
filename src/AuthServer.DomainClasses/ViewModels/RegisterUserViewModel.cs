@@ -29,10 +29,17 @@ namespace AuthServer.DomainClasses.ViewModels
 
         [Required]
         public string DisplayName { get; set; }
+
+        public string deviceId { get; set; }  
+
+        [Required]
+        [MaxLength(11)]
+        [MinLength(11)]
+        public string Mobile { get; set; }
         public bool IsActive { get; set; }
 
         public ICollection<int> RoleIds;
         public ICollection<string> ZoneIds;
-        public ICollection<string> ClaimValues;
+        public ICollection<string> Actions;
     }
 }

@@ -49,6 +49,7 @@ namespace AuthServer.Services
                 foreach(var claimValue in claimValues)
                 {
                     var claim=new UserClaim(claimType,claimValue,insertedBy);
+                    claim.InsertTimespan=DateTime.UtcNow;
                     claims.Add(claim);
                 }
                 return claims;

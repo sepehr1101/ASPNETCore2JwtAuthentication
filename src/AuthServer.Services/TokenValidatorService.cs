@@ -29,8 +29,8 @@ namespace AuthServer.Services
         public async Task ValidateAsync(TokenValidatedContext context)
         {
             var userPrincipal = context.Principal;
-
             var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+            
             if (claimsIdentity?.Claims == null || !claimsIdentity.Claims.Any())
             {
                 context.Fail("This is not our issued token. It has no claims.");

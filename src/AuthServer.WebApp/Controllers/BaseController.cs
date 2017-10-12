@@ -19,12 +19,31 @@ namespace AuthServer.WebApp.Controllers
     [Authorize]
     public abstract class BaseController : Controller
     {
-        public Guid GetMyUserId()   
+        private ClaimsIdentity GetMyClaimsIdentity()
         {
             var identity = User.Identity as ClaimsIdentity;
+            return identity;
+        }
+        public Guid GetMyUserId()   
+        {
+            var identity = GetMyClaimsIdentity();
             var userIdString = identity.FindFirst(c => c.Type.Equals("userId")).Value;
             var userId = new Guid(userIdString);
             return userId;
+        }
+
+        public bool TokenContainsThis(string controller,string action)
+        {
+            var shouldFindValue=String.Join(".",controller.Trim(),action.Trim());
+            var identity = GetMyClaimsIdentity();
+            var actionValue=identity.FindFirst(c =>
+                 c.Type =="action" &&
+                 c.Value==shouldFindValue);
+            if(actionValue==null)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

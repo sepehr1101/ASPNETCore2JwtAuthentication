@@ -97,10 +97,12 @@ namespace AuthServer.DataLayer.Context
                 entity.HasIndex(e => e.Username).IsUnique();
                 entity.Property(e => e.UserCode).IsRequired();
                 entity.HasIndex(e => e.UserCode).IsUnique();
-                entity.Property(e => e.FirstName).HasMaxLength(450).IsRequired();
-                entity.Property(e => e.LastName).HasMaxLength(450).IsRequired();
+                entity.Property(e => e.FirstName).HasMaxLength(450).IsRequired().IsUnicode();
+                entity.Property(e => e.LastName).HasMaxLength(450).IsRequired().IsUnicode();
                 entity.Property(e => e.Email).HasMaxLength(450).IsRequired();
                 entity.Property(e => e.EmailConfirmed).IsRequired();
+                entity.Property(e => e.Mobile).HasMaxLength(11).IsRequired();
+                entity.Property(e => e.MobileConfirmed).IsRequired(true);
                 entity.Property(e => e.JoinTimespan).IsRequired();                
                 entity.Property(e => e.Password).IsRequired();
                 entity.Property(e => e.SerialNumber).HasMaxLength(450);
@@ -113,6 +115,7 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.LockTimespan).IsRequired();
                 entity.Property(e=>e.RequireRecaptcha).IsRequired();
                 entity.Property(e=>e.IncludeThisRecord).IsRequired();
+                entity.Property(e => e.DeviceId).IsRequired();
             });
         }
         private void BuildRoleModel(ModelBuilder builder)
@@ -203,6 +206,7 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.PasswordContainsNonAlphaNumeric).IsRequired();
                 entity.Property(e=>e.PasswordContainsNumber).IsRequired();
                 entity.Property(e=>e.PasswordContainsUppercase).IsRequired();
+                entity.Property(e => e.CanUpdateDeviceId).IsRequired().HasDefaultValue(false);
             });
         }
         private void BuildBrowserModel(ModelBuilder builder)

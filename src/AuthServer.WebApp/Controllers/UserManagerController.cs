@@ -50,11 +50,11 @@ namespace AuthServer.WebApp.Controllers
              _roleService.CheckArgumentIsNull(nameof(_roleService));
          }
 
-         [HttpPut]    
+         [HttpPut]
          public async Task<IActionResult> RegisterUser([FromBody]RegisterUserViewModel registerUserViewModel)
          {
              if(!ModelState.IsValid)
-             {
+             {                 
                  return BadRequest("خطا در اطلاعات");
              }
              var user=GetUser(registerUserViewModel);
@@ -70,8 +70,12 @@ namespace AuthServer.WebApp.Controllers
              user.IsActive=true;
              user.JoinTimespan=DateTime.UtcNow;
              user.SerialNumber=Guid.NewGuid().ToString("N");
-             user.UserClaims=GetClaims(registerUserViewModel.ZoneIds,registerUserViewModel.ClaimValues,userId);
+             user.UserClaims=GetClaims(registerUserViewModel.ZoneIds,registerUserViewModel.Actions,userId);
              user.UserRoles=_roleService.ConvertToUserRoles(registerUserViewModel.RoleIds);
+             user.LowercaseEmail=user.Email.ToLower();
+             user.LowercaseUsername=user.Username.ToLower();
+             user.Mobile=registerUserViewModel.Mobile;
+             user.DeviceId=registerUserViewModel.deviceId;
              return user;                     
          }
          private ICollection<UserClaim> GetClaims(ICollection<string> zoneIds,ICollection<string> actions,Guid userId)

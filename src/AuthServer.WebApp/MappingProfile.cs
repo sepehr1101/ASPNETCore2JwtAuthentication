@@ -10,6 +10,7 @@ namespace AuthServer.WebApp
         public MappingProfile() 
         {           
             CreateMap<RegisterUserViewModel,User>();
+            CreateMap<Role,RoleInfo>();
         }
     }
 }

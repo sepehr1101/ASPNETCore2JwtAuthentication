@@ -105,15 +105,15 @@ namespace AuthServer.Services
             var userRoles=new List<UserRole>();
             if(roleIds==null || roleIds.Count<1)
             {
-                foreach(var roleId in roleIds)
-                {
-                    var userRole=new UserRole();
-                    userRole.RoleId=roleId;
-                    userRoles.Add(userRole);
-                }
-                return userRoles;
+               return null;
             }
-            return null;
+            foreach(var roleId in roleIds)
+            {
+                var userRole=new UserRole();
+                userRole.RoleId=roleId;
+                userRoles.Add(userRole);
+            }
+            return userRoles;            
         }
     }
 }

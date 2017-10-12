@@ -6,6 +6,7 @@ using AuthServer.DomainClasses;
 using AuthServer.DomainClasses.ConstantTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 
 namespace AuthServer.Services
 {
@@ -68,28 +69,64 @@ namespace AuthServer.Services
                     
                     if(!context.Policies.Any())
                     {
-                        var policy=new Policy
-                        {
-                            EnableValidIpRecaptcha=false,
-                            RequireRecaptchaInvalidAttempts=6,
-                            LockInvalidAttempts=10,
-                            IsActive=true,
-                            MinPasswordLength=4,
-                            PasswordContainsLowercase=false,
-                            PasswordContainsNonAlphaNumeric=false,
-                            PasswordContainsNumber=false,
-                            PasswordContainsUppercase=false
-                        };
+                        var policy= CreatePolicy();
                         context.Add(policy);
                     }
 
+                    if(!context.AuthLevel1s.Any())
+                    {
+                        var query=GetAuthLevelQuery();
+                        context.Database.ExecuteSqlCommand(query);
+                    }
                     // Add Admin user
                     if (!context.Users.Any())
                     {
-                        var adminUser = new User
+                        var adminUser = CreateAdminUser();
+                       
+                        var adminUserRole=new UserRole { Role = adminRole, User = adminUser };
+                        var userUserRole=new UserRole { Role = userRole, User = adminUser };
+                        var userRoles=new UserRole[]{adminUserRole,userUserRole};
+                        adminUser.UserRoles=userRoles;
+                        var claims= GetUserClaims(adminUser.Id);
+                        adminUser.UserClaims=claims;                   
+                        context.Add(adminUser);                       
+                    }
+
+                    if(!context.Browsers.Any())
+                    {
+                       
+                        var browsers= CreateBrowsers();
+                        context.AddRange(browsers);
+                    }
+                    context.SaveChanges();
+                }
+            }
+        }
+
+        private Policy CreatePolicy()
+        {
+            var policy=new Policy
+                    {
+                        EnableValidIpRecaptcha=false,
+                        RequireRecaptchaInvalidAttempts=6,
+                        LockInvalidAttempts=10,
+                        IsActive=true,
+                        MinPasswordLength=4,
+                        PasswordContainsLowercase=false,
+                        PasswordContainsNonAlphaNumeric=false,
+                        PasswordContainsNumber=false,
+                        PasswordContainsUppercase=false,
+                        CanUpdateDeviceId=true
+                    };
+            return policy;
+        }
+        private User CreateAdminUser()
+        {
+          var admin=  new User
                         {
                             Id=Guid.NewGuid(),
                             Username = "sysAdmin",
+                            LowercaseUsername="sysadmin",
                             UserCode=256,
                             DisplayName = "مدیر سیستم",
                             IsActive = true,
@@ -99,26 +136,18 @@ namespace AuthServer.Services
                             FirstName="مدیر" ,
                             LastName="سیستم" ,
                             JoinTimespan= DateTimeOffset.UtcNow,
-                            Email="sepehr@example.com",
+                            Email="Sepehr@example.com",
+                            LowercaseEmail="sepehr@example.com",
                             EmailConfirmed=false,
+                            Mobile="09130000000",
+                            MobileConfirmed=false,
                             IncludeThisRecord=true
                         };
-                       
-                        var adminUserRole=new UserRole { Role = adminRole, User = adminUser };
-                        var userUserRole=new UserRole { Role = userRole, User = adminUser };
-                        var userRoles=new UserRole[]{adminUserRole,userUserRole};
-                        adminUser.UserRoles=userRoles;
-
-                        var claim=new UserClaim{ClaimType=CustomClaimTypes.Action,
-                            ClaimValue="",InsertBy=adminUser.Id,
-                            InsertTimespan=DateTimeOffset.UtcNow};
-                        adminUser.UserClaims=new UserClaim[]{claim};                       
-                        context.Add(adminUser);                       
-                    }
-
-                    if(!context.Browsers.Any())
-                    {
-                        var firefox=new Browser
+                return admin;
+        }
+        private ICollection<Browser> CreateBrowsers()
+        {
+             var firefox=new Browser
                         {
                             Id=1,
                             TitleEng="Mozilla FireFox",
@@ -146,12 +175,34 @@ namespace AuthServer.Services
                             TitleFa="اینترنت اکسپلورر",
                             IconClass="ie"
                         };
-                        var browsers=new []{firefox,chrome,edge,ie};
-                        context.AddRange(browsers);
-                    }
-                    context.SaveChanges();
-                }
-            }
+                var browsers=new []{firefox,chrome,edge,ie};
+                return browsers;
+        }
+        private string GetAuthLevelQuery()
+        {
+            var query=  @"INSERT [dbo].[AuthLevel1s] ([Id], [AppBoundaryCode], [AppBoundaryTitle]) VALUES (1, 1, N'مدیریت کاربران') 
+            INSERT [dbo].[AuthLevel1s] ([Id], [AppBoundaryCode], [AppBoundaryTitle]) VALUES (2, 2, N'قرائت')        
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (1, 1, N'fa-lock', N'ایجاد کاربر', N'l2_1')        
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (2, 2, N'fa-info', N'اطلاعات', N'l2_2')        
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (3, 1, N'fa-info', N'کاربران', N'l2_3')        
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (1, 1, N'', N'Auth', N'', N'UserManager', N'Add', N'افزودن', N'l3_1')        
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (2, 2, N'', N'', N'', N'Programmer', N'RenderExecuteQueryAll', N'مشاهده', N'l3_2')        
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (3, 2, N'', N'', N'', N'RoleManger', N'M1', N'مباحثه', N'l3_3')        
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (4, 3, N'', N'', N'', N'UserManager', N'CreateUser', N'ثبت کاربر', N'l3_4')        
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (1, 1, N'همه موارد', N'UserManager.Add')        
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (2, 2, N'همه', N'Programmer.RenderExecuteQueryAll')        
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (3, 3, N'all', N'C2.M1')        
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (4, 3, N'all', N'C2.M2')        
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (5, 4, N'همه', N'UserManager.CreateUser')";
+            return query;
+        }
+        private ICollection<UserClaim> GetUserClaims(Guid userId)
+        {
+             var claim=new UserClaim{ClaimType=CustomClaimTypes.Action,
+                            ClaimValue="UserManager.Add",InsertBy=userId,IsActive=true,
+                            InsertTimespan=DateTimeOffset.UtcNow};
+            var claims=new []{claim};
+            return claims;
         }
     }
 }

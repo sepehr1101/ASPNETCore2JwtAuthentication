@@ -10,33 +10,41 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using AutoMapper;
 
 namespace AuthServer.WebApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [EnableCors("CorsPolicy")]
     [Authorize]
      public class RoleManagerController : Controller
     {
          private readonly IUnitOfWork _uow;
          private readonly IRolesService _roleService;
+         private readonly IMapper _mapper;
 
          public RoleManagerController(
              IUnitOfWork uow,
-             IRolesService rolesService)
+             IRolesService rolesService,
+             IMapper mapper)
          {
              _uow=uow;
              _uow.CheckArgumentIsNull(nameof(_uow));
 
              _roleService=rolesService;
              _roleService.CheckArgumentIsNull(nameof(_roleService));
+
+             _mapper=mapper;
+             _mapper.CheckArgumentIsNull(nameof(_mapper));
          }
 
          [HttpGet]         
          public async Task<IActionResult> GetAll()
          {
              var roles=await _roleService.GetAsync().ConfigureAwait(false);
+             //var rolesInfo= _mapper.Map<ICollection<RoleInfo>>(roles);
              return Ok(roles);
          }
 

@@ -1,6 +1,6 @@
 namespace AuthServer.DomainClasses
 {
-    public  class Policy
+    public class Policy
     {
         public int Id { get; set; }
         public bool EnableValidIpRecaptcha { get; set; }
@@ -12,5 +12,6 @@ namespace AuthServer.DomainClasses
         public bool PasswordContainsLowercase { get; set; }
         public bool PasswordContainsUppercase { get; set; }
         public bool PasswordContainsNonAlphaNumeric { get; set; }        
+        public bool CanUpdateDeviceId { get; set; }
     }    
 }

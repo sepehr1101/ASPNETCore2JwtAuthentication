@@ -79,10 +79,14 @@ namespace AuthServer.DataLayer.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserCode= table.Column<int>(type:"int",nullable:false),
                     Username = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    LowercaseUsername= table.Column<string>(type:"nvarchar(450)",maxLength:450, nullable:false),
                     FirstName=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
                     LastName=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
                     Email=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
+                    LowercaseEmail= table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
                     EmailConfirmed=table.Column<bool>(type:"bit",nullable:false),
+                    Mobile =table.Column<string>(type:"char(11)",nullable:false),
+                    MobileConfirmed=table.Column<bool>(type:"bit",nullable:false),
                     DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     LastLoggedIn = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -93,14 +97,17 @@ namespace AuthServer.DataLayer.Migrations
                     IsLocked=table.Column<bool>(type:"bit",nullable:false),
                     LockTimespan=table.Column<DateTimeOffset>(type:"datetimeoffset",nullable:true),
                     RequireRecaptcha= table.Column<bool>(type:"bit",nullable:false),
-                    IncludeThisRecord= table.Column<bool>(type:"bit",nullable:false)
+                    IncludeThisRecord= table.Column<bool>(type:"bit",nullable:false),
+                    DeviceId=table.Column<string>(type:"nvarchar(MAX)",nullable:true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                     table.UniqueConstraint("Unique_UserCode",x =>x.UserCode);
                     table.UniqueConstraint("Unique_Email",x =>x.Email);
-                    table.UniqueConstraint("Unique_Username",x =>x.Username);
+                    table.UniqueConstraint("Unique_Username",x =>x.Username);                    
+                    table.UniqueConstraint("Unique_LowecaseUserName",x=>x.LowercaseUsername);
+                    table.UniqueConstraint("Unique_LowecaseEmail",x=>x.LowercaseEmail);
                 });
 
         }
@@ -205,8 +212,7 @@ namespace AuthServer.DataLayer.Migrations
                 name: "AuthLevel1s",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     AppBoundaryCode = table.Column<int>(type: "int", nullable: false),
                     AppBoundaryTitle = table.Column<string>(type: "nvarchar(255)", nullable: false),
                 },
@@ -221,8 +227,7 @@ namespace AuthServer.DataLayer.Migrations
                 name: "AuthLevel2s",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     AuthLevel1Id = table.Column<int>(type: "int", nullable: false),
                     IconClass = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
@@ -245,8 +250,7 @@ namespace AuthServer.DataLayer.Migrations
                 name: "AuthLevel3s",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     AuthLevel2Id = table.Column<int>(type: "int", nullable: false),
                     Domain = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     PreRoute = table.Column<string>(type: "nvarchar(255)", nullable: false),
@@ -273,8 +277,7 @@ namespace AuthServer.DataLayer.Migrations
                 name: "AuthLevel4s",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     AuthLevel3Id = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(255)", nullable: false)
@@ -306,7 +309,8 @@ namespace AuthServer.DataLayer.Migrations
                     PasswordContainsNumber = table.Column<bool>(type: "bit", nullable: false),
                     PasswordContainsLowercase = table.Column<bool>(type: "bit", nullable: false),
                     PasswordContainsUppercase = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordContainsNonAlphaNumeric = table.Column<bool>(type: "bit", nullable: false)
+                    PasswordContainsNonAlphaNumeric = table.Column<bool>(type: "bit", nullable: false),
+                    CanUpdateDeviceId =table.Column<bool>(type:"bit",nullable:false)
                 },
                 constraints: table =>
                 {

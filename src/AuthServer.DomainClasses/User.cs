@@ -15,10 +15,14 @@ namespace AuthServer.DomainClasses
         public Guid Id { get; set; }
         public int UserCode { get; set; }
         public string Username { get; set; }
+        public string LowercaseUsername { get; set; }
         public string FirstName { get; set; } 
         public string LastName { get; set; }
         public string Email { get; set; }
+        public string LowercaseEmail { get; set; }
         public bool EmailConfirmed { get; set; }
+        public string Mobile { get; set; }
+        public bool MobileConfirmed { get; set; }
         public string Password { get; set; }
         public string DisplayName { get; set; }
         public bool IsActive { get; set; }
@@ -36,6 +40,7 @@ namespace AuthServer.DomainClasses
         public DateTimeOffset LockTimespan { get; set; }
         public bool RequireRecaptcha { get; set; }
         public bool IncludeThisRecord { get; set; }
+        public string DeviceId { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
         public virtual ICollection<UserClaim> UserClaims { get; set; }
         public virtual ICollection<Login> Logins{get;set;}
