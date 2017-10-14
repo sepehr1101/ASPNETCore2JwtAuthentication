@@ -17,9 +17,10 @@ namespace AuthServer.Services
         Task<User> FindUserAsync(string username, string password);
         Task<User> FindUserAsync(Guid userId);
         Task<User> FindUserAsync(string username);
+        Task<ICollection<User>> Get(int take,int skip);
         Task UpdateUserLastActivityDateAsync(Guid userId);
-
         Task RegisterUserAsync(User user);
+        Task UpdateDeviceSerialAsync(Guid userId,string deviceId);
     }
 
     public class UsersService : IUsersService
@@ -71,6 +72,11 @@ namespace AuthServer.Services
             return newSerialNumber;
         }
       
+        public async Task<ICollection<User>> Get(int take,int skip)
+        {
+            var users=await _users.OrderBy(u => u.Username).Skip(skip).Take(take).ToListAsync();
+            return users;
+        }
         public async Task UpdateUserLastActivityDateAsync(Guid userId)
         {
             var user = await FindUserAsync(userId).ConfigureAwait(false);
@@ -90,8 +96,14 @@ namespace AuthServer.Services
 
         public async Task RegisterUserAsync(User user)
         {
-            _securityService.GetSha256Hash(user.Password.Trim());
+            user.Password= _securityService.GetSha256Hash(user.Password.Trim());
             await _users.AddAsync(user);
+        }
+
+        public async Task UpdateDeviceSerialAsync(Guid userId,string deviceId)
+        {
+            var user=await FindUserAsync(userId).ConfigureAwait(false);
+            user.DeviceId=deviceId;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace AuthServer.WebApp
         {           
             CreateMap<RegisterUserViewModel,User>();
             CreateMap<Role,RoleInfo>();
+            CreateMap<User,UserDisplayViewModel>();
         }
     }
 }

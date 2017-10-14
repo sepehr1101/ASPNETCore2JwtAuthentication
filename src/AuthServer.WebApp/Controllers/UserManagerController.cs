@@ -50,6 +50,14 @@ namespace AuthServer.WebApp.Controllers
              _roleService.CheckArgumentIsNull(nameof(_roleService));
          }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers(int take=200,int skip=0)
+        {
+            var users=await _userService.Get(take,skip).ConfigureAwait(false);
+            var usersDisplayViewModel=_mapper.Map<List<UserDisplayViewModel>>(users);
+            return Ok(usersDisplayViewModel);
+        }
+
          [HttpPut]
          public async Task<IActionResult> RegisterUser([FromBody]RegisterUserViewModel registerUserViewModel)
          {

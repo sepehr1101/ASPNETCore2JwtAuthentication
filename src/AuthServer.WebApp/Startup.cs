@@ -43,6 +43,7 @@ namespace AuthServer.WebApp
             services.AddScoped<IClaimService,ClaimService>();
             services.AddScoped<ILoginService,LoginService>();
             services.AddScoped<IAuthLevelService,AuthLevelService>();
+            services.AddScoped<IPolicyService,PolicyService>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -174,6 +175,7 @@ namespace AuthServer.WebApp
             app.UseStatusCodePages();
             app.UseDefaultFiles(); // so index.html is not required
             app.UseStaticFiles();
+            app.UseDeveloperExceptionPage();
 
             app.UseMvc(routes =>
             {

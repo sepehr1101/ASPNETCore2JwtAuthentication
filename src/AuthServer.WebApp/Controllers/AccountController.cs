@@ -16,12 +16,13 @@ namespace AuthServer.WebApp.Controllers
 {
     [Route("[controller]")]
     [EnableCors("CorsPolicy")]
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly IUsersService _usersService;
         private readonly ITokenStoreService _tokenStoreService;
         private readonly ILoginService _loginService;
         private readonly IAuthLevelService _authLevelService;
+        private readonly IPolicyService _policyService;
         private readonly IUnitOfWork _uow;
 
         public AccountController(
@@ -29,6 +30,7 @@ namespace AuthServer.WebApp.Controllers
             ITokenStoreService tokenStoreService,
             ILoginService loginService,
             IAuthLevelService authLevelService,
+            IPolicyService policyService,
             IUnitOfWork uow)
         {
             _usersService = usersService;
@@ -42,6 +44,9 @@ namespace AuthServer.WebApp.Controllers
 
             _authLevelService=authLevelService;
             _authLevelService.CheckArgumentIsNull(nameof(_authLevelService));
+
+            _policyService=policyService;
+            _policyService.CheckArgumentIsNull(nameof(_policyService));
 
             _uow = uow;
             _uow.CheckArgumentIsNull(nameof(_uow));
@@ -151,6 +156,21 @@ namespace AuthServer.WebApp.Controllers
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
             return Json(new { Username = claimsIdentity.Name });
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> UpdateDeviceId(string deviceId)
+        {
+            var policy=await _policyService.FindFirstAsync();
+            if(!policy.CanUpdateDeviceId)
+            {
+                return BadRequest("cant update deviceId");
+            }
+            var userId=GetMyUserId();
+            await _usersService.UpdateDeviceSerialAsync(userId,deviceId)
+                .ConfigureAwait(false);
+            await _uow.SaveChangesAsync().ConfigureAwait(false);
+            return Ok();
         }
     }
 }
