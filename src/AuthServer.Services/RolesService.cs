@@ -22,7 +22,10 @@ namespace AuthServer.Services
         Task<List<User>> FindUsersInRoleAsync(string roleName);
         Task<List<User>> FindUsersInRoleAsync(int roleId);
         Task AddAsync(Role role);
+        Task AddRangeAsync(ICollection<UserRole> userRoles);
         ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds);
+        ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds,Guid userId);
+        Task DisablePreviuosRoles(Guid userId);
     }
 
     public class RolesService : IRolesService
@@ -99,7 +102,10 @@ namespace AuthServer.Services
         {  
             await _roles.AddAsync(role).ConfigureAwait(false);
         }
-
+        public async Task AddRangeAsync(ICollection<UserRole> userRoles)
+        {
+            await _userRoles.AddRangeAsync(userRoles);
+        }
         public ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds)
         {
             var userRoles=new List<UserRole>();
@@ -114,6 +120,33 @@ namespace AuthServer.Services
                 userRoles.Add(userRole);
             }
             return userRoles;            
+        }
+         public ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds,Guid userId)
+        {
+            var userRoles=new List<UserRole>();
+            if(roleIds==null || roleIds.Count<1)
+            {
+               return null;
+            }
+            foreach(var roleId in roleIds)
+            {
+                var userRole=new UserRole();
+                userRole.RoleId=roleId;
+                userRole.UserId=userId;
+                userRole.IsActive=true;
+                userRoles.Add(userRole);
+            }
+            return userRoles;            
+        }
+
+        public async Task DisablePreviuosRoles(Guid userId)
+        {
+            var userRoles=await _userRoles.Where(u => u.UserId==userId)
+                .ToListAsync();
+            foreach(var userRole in userRoles)
+            {
+                userRole.IsActive=false;
+            }
         }
     }
 }

@@ -83,8 +83,8 @@ namespace AuthServer.Services
                     {
                         var adminUser = CreateAdminUser();
                        
-                        var adminUserRole=new UserRole { Role = adminRole, User = adminUser };
-                        var userUserRole=new UserRole { Role = userRole, User = adminUser };
+                        var adminUserRole=new UserRole { Role = adminRole, User = adminUser,IsActive=true };
+                        var userUserRole=new UserRole { Role = userRole, User = adminUser,IsActive=true };
                         var userRoles=new UserRole[]{adminUserRole,userUserRole};
                         adminUser.UserRoles=userRoles;
                         var claims= GetUserClaims(adminUser.Id);

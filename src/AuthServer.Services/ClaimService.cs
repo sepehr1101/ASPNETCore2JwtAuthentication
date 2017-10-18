@@ -12,8 +12,11 @@ namespace AuthServer.Services
     public interface IClaimService
     {
         void Add (Guid userId,string claimType, string claimValue);
+        Task AddRangeAsync(ICollection<UserClaim> userClaims);
         ICollection<Claim> GetClaims (Guid userId);
         List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy);
+        List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy,Guid userId);
+        Task DisablePrviousClaims(Guid userId);
     }
     public class ClaimService : IClaimService 
     {
@@ -33,7 +36,10 @@ namespace AuthServer.Services
             userClaim.UserId=userId;
             _userClaims.Add(userClaim);
         }
-
+        public async Task AddRangeAsync(ICollection<UserClaim> userClaims)
+        {
+            await _userClaims.AddRangeAsync(userClaims);
+        }
         public ICollection<Claim> GetClaims(Guid userId)
         {
             var query=_userClaims.Where(u=>u.UserId==userId)
@@ -55,6 +61,32 @@ namespace AuthServer.Services
                 return claims;
             }
             return null;
+        }
+
+        public List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy,Guid userId)
+        {
+            var claims=new List<UserClaim>();
+            if(claimValues!=null && claimValues.Count>0)
+            {
+                foreach(var claimValue in claimValues)
+                {
+                    var claim=new UserClaim(claimType,claimValue,insertedBy);
+                    claim.InsertTimespan=DateTime.UtcNow;
+                    claim.UserId=userId;
+                    claims.Add(claim);
+                }
+                return claims;
+            }
+            return null;
+        }
+        public async Task DisablePrviousClaims(Guid userId)
+        {
+            var userClaims=await _userClaims.Where(u => u.UserId==userId)
+                .ToListAsync();
+            foreach (var userClaim in userClaims)
+            {
+                userClaim.IsActive=false;
+            }
         }
     }
 }

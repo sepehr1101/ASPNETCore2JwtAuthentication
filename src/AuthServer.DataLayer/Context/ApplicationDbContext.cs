@@ -121,7 +121,7 @@ namespace AuthServer.DataLayer.Context
         private void BuildRoleModel(ModelBuilder builder)
         {
               builder.Entity<Role>(entity =>
-            {
+            {               
                 entity.Property(e => e.Name).HasMaxLength(450).IsRequired();
                 entity.Property(e =>e.TitleFa).HasMaxLength(450).IsRequired();
                 entity.Property(e=>e.IsActive).IsRequired();
@@ -132,11 +132,13 @@ namespace AuthServer.DataLayer.Context
         {
                builder.Entity<UserRole>(entity =>
             {
-                entity.HasKey(e => new { e.UserId, e.RoleId });
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.RoleId);
                 entity.Property(e => e.UserId);
                 entity.Property(e => e.RoleId);
+                entity.Property(e => e.IsActive);
                 entity.HasOne(d => d.Role).WithMany(p => p.UserRoles).HasForeignKey(d => d.RoleId);
                 entity.HasOne(d => d.User).WithMany(p => p.UserRoles).HasForeignKey(d => d.UserId);
             });
