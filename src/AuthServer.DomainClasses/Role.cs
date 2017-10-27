@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace AuthServer.DomainClasses
 {
-     public class Role
+    public class Role
     {
         public Role()
         {
@@ -13,7 +13,7 @@ namespace AuthServer.DomainClasses
         public string Name { get; set; }
         public string TitleFa { get; set; }
         public bool IsActive { get; set; }
-
         public virtual ICollection<UserRole> UserRoles { get; set; }
     }
+  
 }

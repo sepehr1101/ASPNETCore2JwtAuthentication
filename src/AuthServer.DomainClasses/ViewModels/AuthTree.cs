@@ -7,6 +7,7 @@ namespace AuthServer.DomainClasses.ViewModels
         public int Id { get; set; }
         public string Title { get; set; }
     }
+    
     public class A1:BaseA
     {       
         public ICollection<A2> A2s { get; set; }
@@ -27,5 +28,6 @@ namespace AuthServer.DomainClasses.ViewModels
     public class A4:BaseA
     {
         public string ClaimValue { get; set; }
+        public bool IsSelected { get; set; }
     }
 }

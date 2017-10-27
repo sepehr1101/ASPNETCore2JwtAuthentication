@@ -12,24 +12,24 @@
 <body>
     <div class="container">
         <h1 class="alert alert-info">Testing Jwt Authentication without ASP.NET Core Identity 2.0</h1>
-        <button type="button" class="btn btn-success" onclick="doLogin('/api/account/login',{
+        <button type="button" class="btn btn-success" onclick="doLogin('/account/login',{
         username: 'sepehr',
         password: '123456'})" id="login">Login (Valid user)</button>
 
-        <button type="button" class="btn btn-default" onclick="doLogin('/api/account/login',{
+        <button type="button" class="btn btn-default" onclick="doLogin('/account/login',{
         username: 'Xyz',
         password: '12345'})" id="login">Login (Invalid user)</button>
 
-        <button type="button" class="btn btn-info" onclick="doCallApi('/api/MyProtectedApi')"
+        <button type="button" class="btn btn-info" onclick="doCallApi('/MyProtectedApi')"
             id="callApi">Call Protected API ([Authorize])</button>
 
-        <button type="button" class="btn btn-info" onclick="doCallApi('/api/MyProtectedAdminApi')"
+        <button type="button" class="btn btn-info" onclick="doCallApi('/MyProtectedAdminApi')"
             id="callAdminApi">Call Protected Admin API [Authorize(Roles = "Admin")]</button>
 
-        <button type="button" class="btn btn-warning" onclick="doLogin('/api/account/RefreshToken',{
+        <button type="button" class="btn btn-warning" onclick="doLogin('/account/RefreshToken',{
                 refreshToken: refreshToken})" id="login">Refresh Token</button>
 
-        <button type="button" class="btn btn-danger" onclick="doCallApi('/api/account/logout')"
+        <button type="button" class="btn btn-danger" onclick="doCallApi('/account/logout')"
             name="logout">Logout</button>
 
         <div class="alert alert-warning" style="margin-top: 15px">

@@ -14,6 +14,7 @@ namespace AuthServer.Services
         void Add (Guid userId,string claimType, string claimValue);
         Task AddRangeAsync(ICollection<UserClaim> userClaims);
         ICollection<Claim> GetClaims (Guid userId);
+        Task<ICollection<UserClaim>> GetClaimsAsync(Guid userId);
         List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy);
         List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy,Guid userId);
         Task DisablePrviousClaims(Guid userId);
@@ -45,6 +46,12 @@ namespace AuthServer.Services
             var query=_userClaims.Where(u=>u.UserId==userId)
                 .Select(x=>new Claim(x.ClaimType,x.ClaimValue));
             return query.ToList();
+        }
+         public async Task<ICollection<UserClaim>> GetClaimsAsync(Guid userId)
+        {
+            var query=_userClaims.Where(u=>u.UserId==userId);
+            var userClaims= await query.ToListAsync().ConfigureAwait(false);
+            return userClaims;
         }
 
         public List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy)

@@ -16,16 +16,15 @@ using AutoMapper;
 using System.Transactions;
 
 namespace AuthServer.WebApp.Controllers
-{
-    [Route("[controller]")]
+{   
     [EnableCors("CorsPolicy")]
-    //[Authorize]
      public class UserManagerController : BaseController
     {
          private readonly IUnitOfWork _uow;
          private readonly IUsersService _userService;
          private readonly IClaimService _claimService;
          private readonly IRolesService _roleService;
+         private readonly IAuthLevelService _authLevelService;
          private readonly IMapper _mapper;
 
          public UserManagerController(
@@ -33,7 +32,8 @@ namespace AuthServer.WebApp.Controllers
              IUnitOfWork uow,
              IUsersService usersService,
              IClaimService claimService,
-             IRolesService rolesService)
+             IRolesService rolesService,
+             IAuthLevelService authLevelService)
          {
              _mapper=mapper;
              _mapper.CheckArgumentIsNull(nameof(_mapper));
@@ -49,6 +49,9 @@ namespace AuthServer.WebApp.Controllers
 
              _roleService=rolesService;
              _roleService.CheckArgumentIsNull(nameof(_roleService));
+
+             _authLevelService=authLevelService;
+             _authLevelService.CheckArgumentIsNull(nameof(_authLevelService));
          }
 
         [HttpGet]
@@ -59,18 +62,34 @@ namespace AuthServer.WebApp.Controllers
             return Ok(usersDisplayViewModel);
         }
 
-         [HttpPut]
-         public async Task<IActionResult> RegisterUser([FromBody]RegisterUserViewModel registerUserViewModel)
-         {
-             if(!ModelState.IsValid)
-             {                 
-                 return BadRequest("خطا در اطلاعات");
-             }
-             var user=GetUser(registerUserViewModel);
-             await _userService.RegisterUserAsync(user).ConfigureAwait(false);
-             await _uow.SaveChangesAsync().ConfigureAwait(false);
-             return Ok(registerUserViewModel);
-         }
+        [HttpGet]
+        public async Task<IActionResult> GetUserEditInfo(Guid id)
+        {
+            var userAuthTree=await _authLevelService.GetUserAccessListAsync(id)
+                .ConfigureAwait(false);
+            var roleInfos= await _roleService.GetUserRoleInfoAsync(id).ConfigureAwait(false);
+            var user=await _userService.FindUserAsync(id).ConfigureAwait(false);
+            var userInfo=_mapper.Map<UserInfo>(user);
+            var userEditInfo=new UserEditViewModel(roleInfos,userAuthTree,userInfo);
+            return Ok(userEditInfo);
+        }
+        
+        
+        [HttpPut]    
+        public async Task<IActionResult> RegisterUser([FromBody]RegisterUserViewModel registerUserViewModel)
+        {
+            if(!ModelState.IsValid)
+            {                 
+                return BadRequest("خطا در اطلاعات");
+            }
+            var user = GetUser(registerUserViewModel);
+            await _userService.RegisterUserAsync(user).ConfigureAwait(false);
+            await _uow.SaveChangesAsync().ConfigureAwait(false);
+            var successMessage=String.Join(" ","کاربر","با کد کاربری",registerUserViewModel.UserCode,"و نام ",
+                registerUserViewModel.DisplayName,"با موفقیت ثبت شد");
+            //var simpleMessageresponse=new SimpleMessageResponse(successMessage);
+            return Ok(successMessage);
+        }
 
          [HttpPatch]
          public async Task<IActionResult> UpdateUser([FromBody]UpdateUserViewModel updateUserViewModel)
@@ -90,6 +109,14 @@ namespace AuthServer.WebApp.Controllers
             await _uow.SaveChangesAsync();
             return Ok();
          }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserClaims(Guid id)
+        {
+            var userClaims=await _claimService.GetClaimsAsync(id).ConfigureAwait(false);            
+            var userClaimViewModels=_mapper.Map<List<UserClaimViewModel>>(userClaims);
+            return Ok(userClaimViewModels);
+        }
          private User GetUser(RegisterUserViewModel registerUserViewModel)
          {
              var myUserId=GetMyUserId();

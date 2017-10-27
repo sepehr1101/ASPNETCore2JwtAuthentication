@@ -40,11 +40,10 @@ namespace AuthServer.WebApp.Controllers
              _mapper.CheckArgumentIsNull(nameof(_mapper));
          }
 
-         [HttpGet]         
+         [HttpGet]    
          public async Task<IActionResult> GetAll()
          {
              var roles=await _roleService.GetAsync().ConfigureAwait(false);
-             //var rolesInfo= _mapper.Map<ICollection<RoleInfo>>(roles);
              return Ok(roles);
          }
 

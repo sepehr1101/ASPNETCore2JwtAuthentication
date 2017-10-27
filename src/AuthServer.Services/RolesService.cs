@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AuthServer.Common;
 using AuthServer.DataLayer.Context;
 using AuthServer.DomainClasses;
+using AuthServer.DomainClasses.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -26,6 +27,7 @@ namespace AuthServer.Services
         ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds);
         ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds,Guid userId);
         Task DisablePreviuosRoles(Guid userId);
+        Task<ICollection<RoleInfo>> GetUserRoleInfoAsync(Guid userId);
     }
 
     public class RolesService : IRolesService
@@ -121,7 +123,7 @@ namespace AuthServer.Services
             }
             return userRoles;            
         }
-         public ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds,Guid userId)
+        public ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds,Guid userId)
         {
             var userRoles=new List<UserRole>();
             if(roleIds==null || roleIds.Count<1)
@@ -147,6 +149,22 @@ namespace AuthServer.Services
             {
                 userRole.IsActive=false;
             }
+        }
+
+        public async Task<ICollection<RoleInfo>> GetUserRoleInfoAsync(Guid userId)
+        {
+            var query=from role in _roles 
+                from  userRole in _userRoles
+                    .Where(r => r.UserId==userId && r.RoleId==role.Id).DefaultIfEmpty()
+                select new RoleInfo
+                {
+                    IsSelected=userRole!=null,
+                    Id=role.Id,
+                    TitleEng=role.Name,
+                    TitleFa=role.TitleFa
+                };
+            var roleInfos = await query.ToListAsync();
+            return roleInfos;
         }
     }
 }

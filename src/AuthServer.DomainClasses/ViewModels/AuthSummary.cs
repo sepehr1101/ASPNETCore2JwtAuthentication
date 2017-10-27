@@ -19,4 +19,9 @@ namespace AuthServer.DomainClasses.ViewModels
         public string IconClass { get; set; }
         public string ClaimValue { get; set; }
     }
+
+    public class AuthSummaryAll:AuthSummary
+    {
+        public bool IsSelected { get; set; }
+    }
 }
