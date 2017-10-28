@@ -154,8 +154,8 @@ namespace AuthServer.Services
         public async Task<ICollection<RoleInfo>> GetUserRoleInfoAsync(Guid userId)
         {
             var query=from role in _roles 
-                from  userRole in _userRoles
-                    .Where(r => r.UserId==userId && r.RoleId==role.Id).DefaultIfEmpty()
+                from  userRole in _userRoles.Where(u => u.IsActive)
+                    .Where(r => r.UserId==userId && r.RoleId==role.Id && r.IsActive).DefaultIfEmpty()
                 select new RoleInfo
                 {
                     IsSelected=userRole!=null,

@@ -7,7 +7,7 @@ namespace AuthServer.DomainClasses.ViewModels
     public class UpdateUserViewModel
     {       
         [Required]
-        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
         public string FirstName { get; set; } 

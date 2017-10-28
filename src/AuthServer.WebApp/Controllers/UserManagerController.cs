@@ -78,11 +78,27 @@ namespace AuthServer.WebApp.Controllers
         [HttpPut]    
         public async Task<IActionResult> RegisterUser([FromBody]RegisterUserViewModel registerUserViewModel)
         {
+            string _errorMessage=String.Empty;
             if(!ModelState.IsValid)
             {                 
-                return BadRequest("خطا در اطلاعات");
+                return BadRequest("خطا در اطلاعات ارسالی ، لطفا ورودی های خود را کنترل فرمایید");
             }
             var user = GetUser(registerUserViewModel);
+            if(await _userService.CanFindUserAsync(user.UserCode))
+            {
+                _errorMessage=String.Join(" ","کاربر با کد کاربری",user.UserCode,"قبلا ثبت شده است");
+                return BadRequest(_errorMessage);
+            }
+            if(await _userService.CanFindUserAsync(user.LowercaseUsername))
+            {
+                _errorMessage=String.Join(" ","کاربر با نام کاربری",user.Username,"قبلا ثبت شده است");
+                return BadRequest(_errorMessage);
+            }
+            if(await _userService.CanFindUserAsync(user.LowercaseEmail))
+            {
+                _errorMessage=String.Join(" ","کاربر با ایمیل",user.Email,"قبلا ثبت شده است");
+                return BadRequest(_errorMessage);
+            }
             await _userService.RegisterUserAsync(user).ConfigureAwait(false);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
             var successMessage=String.Join(" ","کاربر","با کد کاربری",registerUserViewModel.UserCode,"و نام ",
@@ -96,18 +112,19 @@ namespace AuthServer.WebApp.Controllers
          {
              if(!ModelState.IsValid)
              {
-                 return BadRequest("خطا در اطلاعات");
+                 return BadRequest("خطا در اطلاعات ، لطفا ورودی های خود را کنترل فرمایید");
              }
             var myUserId=GetMyUserId();
-            var userInDb=await _userService.FindUserAsync(updateUserViewModel.Id).ConfigureAwait(false);
+            var userInDb=await _userService.FindUserAsync(updateUserViewModel.UserId).ConfigureAwait(false);
             await _roleService.DisablePreviuosRoles(userInDb.Id);
             await _claimService.DisablePrviousClaims(userInDb.Id);
-            var userRoles=_roleService.ConvertToUserRoles(updateUserViewModel.RoleIds,updateUserViewModel.Id);
-            var userClaims=GetClaims(updateUserViewModel.ZoneIds,updateUserViewModel.Actions,myUserId,updateUserViewModel.Id);
+            var userRoles=_roleService.ConvertToUserRoles(updateUserViewModel.RoleIds,updateUserViewModel.UserId);
+            var userClaims=GetClaims(updateUserViewModel.ZoneIds,updateUserViewModel.Actions,myUserId,updateUserViewModel.UserId);
             await _claimService.AddRangeAsync(userClaims);
             await _roleService.AddRangeAsync(userRoles);
             await _uow.SaveChangesAsync();
-            return Ok();
+            var successMessage=String.Join(" ","اطلاعات",updateUserViewModel.DisplayName,"با موفقیت ویرایش شد");
+            return Ok(successMessage);
          }
 
         [HttpGet]

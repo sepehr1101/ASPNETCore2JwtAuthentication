@@ -49,7 +49,7 @@ namespace AuthServer.Services
         }
          public async Task<ICollection<UserClaim>> GetClaimsAsync(Guid userId)
         {
-            var query=_userClaims.Where(u=>u.UserId==userId);
+            var query=_userClaims.Where(u=>u.UserId==userId && u.IsActive);
             var userClaims= await query.ToListAsync().ConfigureAwait(false);
             return userClaims;
         }

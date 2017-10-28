@@ -21,6 +21,10 @@ namespace AuthServer.Services
         Task UpdateUserLastActivityDateAsync(Guid userId);
         Task RegisterUserAsync(User user);
         Task UpdateDeviceSerialAsync(Guid userId,string deviceId);
+
+        Task<bool> CanFindUserAsync(int userCode);
+        Task<bool> CanFindUserAsync(string lowercaseUsername);
+        Task<bool> CanFindUserAsync(string lowercaseEmail,bool isEmail);
     }
 
     public class UsersService : IUsersService
@@ -104,6 +108,34 @@ namespace AuthServer.Services
         {
             var user=await FindUserAsync(userId).ConfigureAwait(false);
             user.DeviceId=deviceId;
+        }
+
+        public async Task<bool> CanFindUserAsync(int userCode)
+        {
+            var user=await _users.FirstOrDefaultAsync(u => u.UserCode==userCode);
+            if(user!=null)
+            {
+                return true;
+            }
+            return false;
+        }
+        public async Task<bool> CanFindUserAsync(string lowercaseUsername)
+        {
+            var user=await _users.FirstOrDefaultAsync(u => u.LowercaseUsername.Trim()==lowercaseUsername.Trim());
+            if(user!=null)
+            {
+                return true;
+            }
+            return false;
+        }
+        public async Task<bool> CanFindUserAsync(string lowercaseEmail,bool isEmail)
+        {
+            var user=await _users.FirstOrDefaultAsync(u => u.LowercaseEmail.Trim()==lowercaseEmail.Trim());
+            if(user!=null)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
