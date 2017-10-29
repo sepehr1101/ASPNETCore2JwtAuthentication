@@ -18,16 +18,20 @@ namespace AuthServer.Services
         List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy);
         List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy,Guid userId);
         Task DisablePrviousClaims(Guid userId);
+        IQueryable<UserClaim> AddClaimsToQuery(ICollection<string> claims);
     }
     public class ClaimService : IClaimService 
     {
         private readonly IUnitOfWork _uow;
         private readonly DbSet<UserClaim> _userClaims;
+        private IQueryable<UserClaim> _userClaimQuery;
 
         public ClaimService(IUnitOfWork uow)
         {
             _uow=uow;
             _userClaims=_uow.Set<UserClaim>();
+
+            _userClaimQuery=_userClaims;
         }
         public void Add(Guid userId,string claimType,string claimValue)
         {          
@@ -95,5 +99,16 @@ namespace AuthServer.Services
                 userClaim.IsActive=false;
             }
         }
+
+        public IQueryable<UserClaim> AddClaimsToQuery(ICollection<string> claims)
+        {
+            if(claims==null || claims.Count<1)
+            {
+                return _userClaimQuery;
+            }
+            _userClaimQuery=_userClaims.Where(u => claims.Contains(u.ClaimValue.Trim()) && u.IsActive);
+            return _userClaimQuery;
+        }
+     
     }
 }

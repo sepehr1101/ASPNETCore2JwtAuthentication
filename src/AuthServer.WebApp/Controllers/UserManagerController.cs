@@ -122,6 +122,7 @@ namespace AuthServer.WebApp.Controllers
             var userClaims=GetClaims(updateUserViewModel.ZoneIds,updateUserViewModel.Actions,myUserId,updateUserViewModel.UserId);
             await _claimService.AddRangeAsync(userClaims);
             await _roleService.AddRangeAsync(userRoles);
+            _userService.UpdateUserAsync(userInDb,updateUserViewModel);
             await _uow.SaveChangesAsync();
             var successMessage=String.Join(" ","اطلاعات",updateUserViewModel.DisplayName,"با موفقیت ویرایش شد");
             return Ok(successMessage);
@@ -133,6 +134,16 @@ namespace AuthServer.WebApp.Controllers
             var userClaims=await _claimService.GetClaimsAsync(id).ConfigureAwait(false);            
             var userClaimViewModels=_mapper.Map<List<UserClaimViewModel>>(userClaims);
             return Ok(userClaimViewModels);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetUsersPro([FromBody]UserSearchProViewModel userSearchProViewModel)
+        {
+            var claimQuery=_claimService.AddClaimsToQuery(userSearchProViewModel.Claims);
+            var roleQuery=_roleService.AddRolesToQuery(userSearchProViewModel.RoleIds);
+            var users=await _userService.FindUsersAsync(claimQuery,roleQuery).ConfigureAwait(false);
+            var usersDisplayViewModel=_mapper.Map<List<UserDisplayViewModel>>(users);
+            return Ok(usersDisplayViewModel);
         }
          private User GetUser(RegisterUserViewModel registerUserViewModel)
          {

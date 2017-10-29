@@ -16,10 +16,8 @@ using AutoMapper;
 
 namespace AuthServer.WebApp.Controllers
 {
-    [Route("[controller]")]
     [EnableCors("CorsPolicy")]
-    [Authorize]
-     public class RoleManagerController : Controller
+     public class RoleManagerController : BaseController
     {
          private readonly IUnitOfWork _uow;
          private readonly IRolesService _roleService;
@@ -45,6 +43,14 @@ namespace AuthServer.WebApp.Controllers
          {
              var roles=await _roleService.GetAsync().ConfigureAwait(false);
              return Ok(roles);
+         }
+         [HttpPatch]
+         [Authorize(Policy=CustomRoles.Admin)]
+         public async Task<IActionResult> UpdateRole(Role role)
+         {
+             await _roleService.UpdateRole(role);
+             var successMessage=String.Join(" ","گروه",role.TitleFa,"با موفقیت ویرایش شد");
+             return Ok(successMessage);
          }
 
          [HttpPut]

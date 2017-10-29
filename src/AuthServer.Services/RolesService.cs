@@ -28,6 +28,8 @@ namespace AuthServer.Services
         ICollection<UserRole> ConvertToUserRoles(ICollection<int>roleIds,Guid userId);
         Task DisablePreviuosRoles(Guid userId);
         Task<ICollection<RoleInfo>> GetUserRoleInfoAsync(Guid userId);
+        Task UpdateRole(Role role);
+        IQueryable<UserRole> AddRolesToQuery(ICollection<int> roleIds);
     }
 
     public class RolesService : IRolesService
@@ -36,6 +38,7 @@ namespace AuthServer.Services
         private readonly DbSet<Role> _roles;
         private readonly DbSet<User> _users;
         private readonly DbSet<UserRole> _userRoles;
+        private IQueryable<UserRole> _userRoleQuery;
 
         public RolesService(IUnitOfWork uow)
         {
@@ -45,6 +48,8 @@ namespace AuthServer.Services
             _roles = _uow.Set<Role>();
             _users = _uow.Set<User>();
             _userRoles = _uow.Set<UserRole>();
+
+            _userRoleQuery=_userRoles;
         }
 
         public Task<List<Role>> FindUserRolesAsync(System.Guid userId)
@@ -165,6 +170,23 @@ namespace AuthServer.Services
                 };
             var roleInfos = await query.ToListAsync();
             return roleInfos;
+        }
+
+        public async Task UpdateRole(Role role)
+        {
+            var roleInDb=await _roles.FindAsync(role.Id).ConfigureAwait(false);
+            roleInDb.IsActive=role.IsActive;
+            roleInDb.TitleFa=role.TitleFa;
+        }
+
+        public IQueryable<UserRole> AddRolesToQuery(ICollection<int> roleIds)
+        {
+            if(roleIds==null || roleIds.Count<1)
+            {
+                return _userRoleQuery;
+            }
+            _userRoleQuery=_userRoleQuery.Where(u => roleIds.Contains(u.RoleId) && u.IsActive);
+            return _userRoleQuery;
         }
     }
 }

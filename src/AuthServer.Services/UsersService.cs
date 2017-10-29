@@ -21,10 +21,11 @@ namespace AuthServer.Services
         Task UpdateUserLastActivityDateAsync(Guid userId);
         Task RegisterUserAsync(User user);
         Task UpdateDeviceSerialAsync(Guid userId,string deviceId);
-
+         void UpdateUserAsync(User userInDb,UpdateUserViewModel userViewModel);
         Task<bool> CanFindUserAsync(int userCode);
         Task<bool> CanFindUserAsync(string lowercaseUsername);
         Task<bool> CanFindUserAsync(string lowercaseEmail,bool isEmail);
+        Task<ICollection<User>> FindUsersAsync(IQueryable<UserClaim> userClaims,IQueryable<UserRole> userRoles);
     }
 
     public class UsersService : IUsersService
@@ -110,6 +111,17 @@ namespace AuthServer.Services
             user.DeviceId=deviceId;
         }
 
+        public void UpdateUserAsync(User userInDb,UpdateUserViewModel userViewModel)
+        {
+            userInDb.DeviceId=userViewModel.deviceId;
+            userInDb.DisplayName=userViewModel.DisplayName;
+            userInDb.FirstName=userViewModel.FirstName;
+            userInDb.LastName=userInDb.LastName;
+            userInDb.Mobile=userViewModel.Mobile;
+            var newSerialNumber=Guid.NewGuid().ToString("N");
+            userInDb.SerialNumber=newSerialNumber;            
+        }
+
         public async Task<bool> CanFindUserAsync(int userCode)
         {
             var user=await _users.FirstOrDefaultAsync(u => u.UserCode==userCode);
@@ -136,6 +148,18 @@ namespace AuthServer.Services
                 return true;
             }
             return false;
+        }
+        
+        public async Task<ICollection<User>> FindUsersAsync(IQueryable<UserClaim> userClaims,IQueryable<UserRole> userRoles)
+        {
+            var userQuery=from user in _users
+                join userClaim in userClaims
+                on user.Id equals userClaim.UserId
+                join userRole in userRoles
+                on user.Id equals userRole.UserId
+                select user;
+            var userList= await userQuery.Distinct().ToListAsync().ConfigureAwait(false);
+            return userList;                
         }
     }
 }
