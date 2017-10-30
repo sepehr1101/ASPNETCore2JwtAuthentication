@@ -39,7 +39,7 @@ namespace AuthServer.WebApp
                         .UseIISIntegration()
                         .UseDefaultServiceProvider((context, options) =>
                         {
-                            options.ValidateScopes = context.HostingEnvironment.IsProduction();//IsDevelopment()//IsProduction()
+                            options.ValidateScopes = context.HostingEnvironment.IsDevelopment();//IsDevelopment()//IsProduction()
                         })                        
                         .UseStartup<Startup>()
                         .Build();

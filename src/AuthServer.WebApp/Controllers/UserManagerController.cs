@@ -25,6 +25,7 @@ namespace AuthServer.WebApp.Controllers
          private readonly IClaimService _claimService;
          private readonly IRolesService _roleService;
          private readonly IAuthLevelService _authLevelService;
+         private readonly IPasswordValidatorService _passwordValidator;
          private readonly IMapper _mapper;
 
          public UserManagerController(
@@ -33,7 +34,8 @@ namespace AuthServer.WebApp.Controllers
              IUsersService usersService,
              IClaimService claimService,
              IRolesService rolesService,
-             IAuthLevelService authLevelService)
+             IAuthLevelService authLevelService,
+             IPasswordValidatorService passwordValidator)
          {
              _mapper=mapper;
              _mapper.CheckArgumentIsNull(nameof(_mapper));
@@ -52,6 +54,9 @@ namespace AuthServer.WebApp.Controllers
 
              _authLevelService=authLevelService;
              _authLevelService.CheckArgumentIsNull(nameof(_authLevelService));
+
+             _passwordValidator=passwordValidator;
+             _passwordValidator.CheckArgumentIsNull(nameof(_passwordValidator));
          }
 
         [HttpGet]
@@ -72,8 +77,7 @@ namespace AuthServer.WebApp.Controllers
             var userInfo=_mapper.Map<UserInfo>(user);
             var userEditInfo=new UserEditViewModel(roleInfos,userAuthTree,userInfo);
             return Ok(userEditInfo);
-        }
-        
+        }        
         
         [HttpPut]    
         public async Task<IActionResult> RegisterUser([FromBody]RegisterUserViewModel registerUserViewModel)
@@ -83,22 +87,17 @@ namespace AuthServer.WebApp.Controllers
             {                 
                 return BadRequest("خطا در اطلاعات ارسالی ، لطفا ورودی های خود را کنترل فرمایید");
             }
+            var passwordValidationError=_passwordValidator.ValidatePassword(registerUserViewModel.Password);
+            if(passwordValidationError.HasError)
+            {
+                return BadRequest(passwordValidationError.Error);
+            }
             var user = GetUser(registerUserViewModel);
-            if(await _userService.CanFindUserAsync(user.UserCode))
+            var errorInfo=await GetUserRegisterError(user);
+            if(errorInfo.HasError)
             {
-                _errorMessage=String.Join(" ","کاربر با کد کاربری",user.UserCode,"قبلا ثبت شده است");
-                return BadRequest(_errorMessage);
-            }
-            if(await _userService.CanFindUserAsync(user.LowercaseUsername))
-            {
-                _errorMessage=String.Join(" ","کاربر با نام کاربری",user.Username,"قبلا ثبت شده است");
-                return BadRequest(_errorMessage);
-            }
-            if(await _userService.CanFindUserAsync(user.LowercaseEmail))
-            {
-                _errorMessage=String.Join(" ","کاربر با ایمیل",user.Email,"قبلا ثبت شده است");
-                return BadRequest(_errorMessage);
-            }
+                return BadRequest(errorInfo.HasError);
+            }      
             await _userService.RegisterUserAsync(user).ConfigureAwait(false);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
             var successMessage=String.Join(" ","کاربر","با کد کاربری",registerUserViewModel.UserCode,"و نام ",
@@ -107,13 +106,13 @@ namespace AuthServer.WebApp.Controllers
             return Ok(successMessage);
         }
 
-         [HttpPatch]
-         public async Task<IActionResult> UpdateUser([FromBody]UpdateUserViewModel updateUserViewModel)
-         {
-             if(!ModelState.IsValid)
-             {
-                 return BadRequest("خطا در اطلاعات ، لطفا ورودی های خود را کنترل فرمایید");
-             }
+        [HttpPatch]
+        public async Task<IActionResult> UpdateUser([FromBody]UpdateUserViewModel updateUserViewModel)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest("خطا در اطلاعات ، لطفا ورودی های خود را کنترل فرمایید");
+            }
             var myUserId=GetMyUserId();
             var userInDb=await _userService.FindUserAsync(updateUserViewModel.UserId).ConfigureAwait(false);
             await _roleService.DisablePreviuosRoles(userInDb.Id);
@@ -126,7 +125,7 @@ namespace AuthServer.WebApp.Controllers
             await _uow.SaveChangesAsync();
             var successMessage=String.Join(" ","اطلاعات",updateUserViewModel.DisplayName,"با موفقیت ویرایش شد");
             return Ok(successMessage);
-         }
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetUserClaims(Guid id)
@@ -145,6 +144,8 @@ namespace AuthServer.WebApp.Controllers
             var usersDisplayViewModel=_mapper.Map<List<UserDisplayViewModel>>(users);
             return Ok(usersDisplayViewModel);
         }
+
+        #region private methods (3)
          private User GetUser(RegisterUserViewModel registerUserViewModel)
          {
              var myUserId=GetMyUserId();
@@ -182,5 +183,31 @@ namespace AuthServer.WebApp.Controllers
              }
              throw new ArgumentNullException("user without role and zone!");
          }
+
+         private async Task<ErrorInfo> GetUserRegisterError(User user)
+         {
+             ErrorInfo errorInfo=new ErrorInfo();
+            if(await _userService.CanFindUserAsync(user.UserCode))
+            {
+                errorInfo.HasError=true;
+                errorInfo.Error=String.Join(" ","کاربر با کد کاربری",user.UserCode,"قبلا ثبت شده است");
+                return errorInfo;
+            }
+            if(await _userService.CanFindUserAsync(user.LowercaseUsername))
+            { 
+                errorInfo.HasError=true;
+                errorInfo.Error=String.Join(" ","کاربر با نام کاربری",user.Username,"قبلا ثبت شده است");
+                 return errorInfo;
+            }
+            if(await _userService.CanFindUserAsync(user.LowercaseEmail))
+            {
+                errorInfo.HasError=true;
+                errorInfo.Error=String.Join(" ","کاربر با ایمیل",user.Email,"قبلا ثبت شده است");
+                return errorInfo;
+            }
+            errorInfo.HasError=false;
+            return errorInfo;
+         }
+         #endregion
     }
 }

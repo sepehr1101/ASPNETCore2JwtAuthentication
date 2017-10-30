@@ -14,23 +14,25 @@ using Newtonsoft.Json.Linq;
 
 namespace AuthServer.WebApp.Controllers
 {
-    [Route("api/[controller]")]
     [EnableCors("CorsPolicy")]
-    //[Authorize]
-     public class RoleUserManagerController : Controller
+     public class RoleUserManagerController : BaseController
     {
          private readonly IUnitOfWork _uow;
          private readonly IRolesService _roleService;
+         private readonly IPasswordValidatorService _passwordValidator;
 
          public RoleUserManagerController(
              IUnitOfWork uow,
-             IRolesService rolesService)
+             IRolesService rolesService,
+             IPasswordValidatorService passwordValidator)
          {
              _uow=uow;
              _uow.CheckArgumentIsNull(nameof(_uow));
 
              _roleService=rolesService;
              _roleService.CheckArgumentIsNull(nameof(_roleService));
+
+             _passwordValidator=passwordValidator;
          }
 
          [HttpGet]         
@@ -40,13 +42,15 @@ namespace AuthServer.WebApp.Controllers
              return Ok(roles);
          }
 
-        /* [HttpPut]
-         public async Task<IActionResult> AssignRoleToUser(Guid userId,int roleId)
+         [HttpGet]
+         [AllowAnonymous]
+         public IActionResult Test()
          {
-             var role=_roleService.GetAsync(roleId);
-             role.CheckArgumentIsNull(nameof(role));
-             
-         }*/
-       
+             var passwordValidation1=_passwordValidator.ValidatePassword("123");
+             var passwordValidation2=_passwordValidator.ValidatePassword("abcd2");
+             var passwordValidation3=_passwordValidator.ValidatePassword("ABCD3");
+             var passwordValidation4=_passwordValidator.ValidatePassword("Abc3$");
+             return Ok();
+         }
     }
 }
