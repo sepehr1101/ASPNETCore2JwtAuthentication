@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Newtonsoft.Json.Linq;
+using AutoMapper;
+using System.Collections.Generic;
 
 namespace AuthServer.WebApp.Controllers
 {
-    [Route("[controller]")]
     [EnableCors("CorsPolicy")]
     public class AccountController : BaseController
     {
@@ -24,6 +25,7 @@ namespace AuthServer.WebApp.Controllers
         private readonly IAuthLevelService _authLevelService;
         private readonly IPolicyService _policyService;
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
 
         public AccountController(
             IUsersService usersService,
@@ -31,7 +33,8 @@ namespace AuthServer.WebApp.Controllers
             ILoginService loginService,
             IAuthLevelService authLevelService,
             IPolicyService policyService,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IMapper mapper)
         {
             _usersService = usersService;
             _usersService.CheckArgumentIsNull(nameof(usersService));
@@ -50,10 +53,13 @@ namespace AuthServer.WebApp.Controllers
 
             _uow = uow;
             _uow.CheckArgumentIsNull(nameof(_uow));
+
+            _mapper=mapper;
+            _mapper.CheckArgumentIsNull(nameof(_mapper));
         }
 
         [AllowAnonymous]
-        [HttpPost("[action]")]
+        [HttpPost]
         public async Task<IActionResult> Login([FromBody]  LoginInfo loginUser)
         {           
             bool canILogin=false;
@@ -87,6 +93,13 @@ namespace AuthServer.WebApp.Controllers
             return Ok(new { access_token = accessToken, refresh_token = refreshToken,accessList=accessList });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetUserLogins(Guid userId)
+        {
+            var userLogins=await _loginService.GetUserLogins(userId);
+            var userLoginsDto=_mapper.Map<List<LoginViewModel>>(userLogins);
+            return Ok(userLoginsDto);
+        }
         private Login GetLogin(bool canILogin,User user)
         {
             var login=new Login();
@@ -107,7 +120,7 @@ namespace AuthServer.WebApp.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("[action]")]
+        [HttpPost]
         public async Task<IActionResult> RefreshToken([FromBody]JToken jsonBody)
         {
             var refreshToken = jsonBody.Value<string>("refreshToken");
@@ -125,32 +138,22 @@ namespace AuthServer.WebApp.Controllers
             var (accessToken, newRefreshToken) = await _tokenStoreService.CreateJwtTokens(token.User).ConfigureAwait(false);
             return Ok(new { access_token = accessToken, refresh_token = newRefreshToken });
         }
-
-        [AllowAnonymous]
-        [HttpGet("[action]"), HttpPost("[action]")]
+       
+        [HttpGet, HttpPost]
         public async Task<bool> Logout()
         {
-            var claimsIdentity = this.User.Identity as ClaimsIdentity;
-            var userIdValue = claimsIdentity.FindFirst(ClaimTypes.UserData)?.Value;
+            var userId=GetMyUserId();
 
             // The Jwt implementation does not support "revoke OAuth token" (logout) by design.
-            // Delete the user's tokens from the database (revoke its bearer token)
-            if (!string.IsNullOrWhiteSpace(userIdValue) && System.Guid.TryParse(userIdValue, out System.Guid userId))
-            {
-                await _tokenStoreService.InvalidateUserTokensAsync(userId).ConfigureAwait(false);
-            }
+            // Delete the user's tokens from the database (revoke its bearer token)          
+            await _tokenStoreService.InvalidateUserTokensAsync(userId).ConfigureAwait(false);
+                        
             await _tokenStoreService.DeleteExpiredTokensAsync().ConfigureAwait(false);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
 
             return true;
         }
-
-        [HttpGet("[action]"), HttpPost("[action]")]
-        public bool IsAuthenthenticated()
-        {
-            return User.Identity.IsAuthenticated;
-        }
-
+              
         [HttpGet("[action]"), HttpPost("[action]")]
         public IActionResult GetUserInfo()
         {
@@ -164,7 +167,7 @@ namespace AuthServer.WebApp.Controllers
             var policy=await _policyService.FindFirstAsync();
             if(!policy.CanUpdateDeviceId)
             {
-                return BadRequest("cant update deviceId");
+                return BadRequest("can`t update deviceId");
             }
             var userId=GetMyUserId();
             await _usersService.UpdateDeviceSerialAsync(userId,deviceId)

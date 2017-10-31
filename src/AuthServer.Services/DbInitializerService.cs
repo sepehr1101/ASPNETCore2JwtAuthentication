@@ -204,5 +204,29 @@ namespace AuthServer.Services
             var claims=new []{claim};
             return claims;
         }
+
+        private ICollection<OS> GetOsList()
+        {
+            var osList=new List<OS>()
+            {
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=1,Title="Windows (iTunes)"},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=2,Title="Windows RT"},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=3,Title="Windows Phone"},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=4,Title="Windows"},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=5,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=6,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=7,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=8,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=9,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=10,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=11,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=12,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=13,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=14,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=15,Title=""},
+                new OS{AcceptRequestFrom=false,IconClass=String.Empty,Id=16,Title=""},
+            };
+            return osList;
+        }
     }
 }
