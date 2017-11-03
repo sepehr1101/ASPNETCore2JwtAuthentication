@@ -31,6 +31,12 @@ namespace AuthServer.WebApp.Controllers
             var userId = new Guid(userIdString);
             return userId;
         }
+        public string GetMyUsername()
+        {
+            var identity = GetMyClaimsIdentity();
+            var username = identity.FindFirst(c => c.Type.Equals(ClaimTypes.Name)).Value;
+            return username;
+        }
 
         public bool TokenContainsThis(string controller,string action)
         {

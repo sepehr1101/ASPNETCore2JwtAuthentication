@@ -31,38 +31,38 @@ namespace AuthServer.Services
             _password=password;            
             if(!ValidateEmptiness())
             {
-                _errorInfo.Error=true;
+                _errorInfo.HasError=true;
                 _errorInfo.Error="کلمه عبور نباید خالی باشد";
                 return _errorInfo;
             }
             if(!ValidateMinLength())
             {
-                _errorInfo.Error=true;
+                _errorInfo.HasError=true;
                 _errorInfo.Error=String.Join(" ","حداقل طول کلمه عبور ",_activePolicy.MinPasswordLength,"نویسه است");
                 return _errorInfo;
             }
                
             if(!ValidateDigitExistense())
             {
-                _errorInfo.Error=true;
+                _errorInfo.HasError=true;
                 _errorInfo.Error="لطفا حداقل یک نویسه عددی نیز در کلمه عبور خود لحاظ فرمایید";
                 return _errorInfo;
             }
             if(!ValidateUpperCaseLetter())
             {
-                _errorInfo.Error=true;
+                _errorInfo.HasError=true;
                 _errorInfo.Error="لطفا حداقل یک نویسه با حروف کوچک انگلیسی نیز در کلمه عبور خود لحاظ فرمایید";
                 return _errorInfo;
             }
             if(!ValidateLowerCaseLetter())
             {
-                _errorInfo.Error=true;
+                _errorInfo.HasError=true;
                 _errorInfo.Error="لطفا حداقل یک نویسه با حروف بزرگ انگلیسی نیز در کلمه عبور خود لحاظ فرمایید";
                 return _errorInfo;
             }
             if(!ValidateNonAlphaNumeric())
             {
-                _errorInfo.Error=true;
+                _errorInfo.HasError=true;
                 _errorInfo.Error="لطفا حداقل یک نویسه غیر از اعداد و حروف انگلیسی نیز در کلمه عبور خود لحاظ فرمایید";
                 return _errorInfo;
             }

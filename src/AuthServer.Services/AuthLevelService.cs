@@ -225,7 +225,8 @@ namespace AuthServer.Services
                 on a3.Id=a4.AuthLevel3Id
 				join UserClaims u
 				on LTRIM(RTRIM(a4.Value))=LTRIM(RTRIM(u.ClaimValue)) and
-				u.UserId='{0}' and u.IsActive=1";
+				u.UserId='{0}' and u.IsActive=1 
+                where a1.InSidebar=1";
             var completedQuery=String.Format(query,userId);
             return completedQuery;            
         }

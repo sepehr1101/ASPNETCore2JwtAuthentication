@@ -127,10 +127,33 @@ namespace AuthServer.WebApp.Controllers
             return Ok(successMessage);
         }
 
+        [HttpPatch]
+        public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordViewModel changePasswordViewModel)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest("لطفا ورودی های خود را کنترل فرمایید");
+            }
+             var passwordValidationError=_passwordValidator.ValidatePassword(changePasswordViewModel.NewPassword);
+            if(passwordValidationError.HasError)
+            {
+                return BadRequest(passwordValidationError.Error);
+            }
+            var username=GetMyUsername();
+            var user= await _userService.FindUserAsync(username,changePasswordViewModel.CurrentPassword);
+            if(user==null)
+            {
+                return BadRequest("پسوورد قبلی را اشتباه وارد نموده اید");
+            }
+            _userService.ChangeMyPassword(user,changePasswordViewModel.NewPassword);
+            await _uow.SaveChangesAsync();
+            return Ok("کلمه عبور با موفقیت تغییر یافت");
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetUserClaims(Guid id)
         {
-            var userClaims=await _claimService.GetClaimsAsync(id).ConfigureAwait(false);            
+            var userClaims=await _claimService.GetUserClaimsAsync(id).ConfigureAwait(false);            
             var userClaimViewModels=_mapper.Map<List<UserClaimViewModel>>(userClaims);
             return Ok(userClaimViewModels);
         }

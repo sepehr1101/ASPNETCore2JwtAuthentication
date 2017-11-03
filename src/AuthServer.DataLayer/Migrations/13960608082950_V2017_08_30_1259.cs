@@ -218,6 +218,7 @@ namespace AuthServer.DataLayer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false),
                     AppBoundaryCode = table.Column<int>(type: "int", nullable: false),
                     AppBoundaryTitle = table.Column<string>(type: "nvarchar(255)", nullable: false),
+                    InSidebar =table.Column<bool>(type:"bit",nullable:false)
                 },
                 constraints: table =>
                 {
@@ -307,6 +308,7 @@ namespace AuthServer.DataLayer.Migrations
                     EnableValidIpRecaptcha = table.Column<bool>(type: "bit", nullable: false),
                     RequireRecaptchaInvalidAttempts = table.Column<int>(type: "int", nullable: false),
                     LockInvalidAttempts = table.Column<int>(type: "int", nullable: false),
+                    LockMin = table.Column<int>(type:"int",nullable:false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     MinPasswordLength=table.Column<int>(type:"int",nullable:false),
                     PasswordContainsNumber = table.Column<bool>(type: "bit", nullable: false),

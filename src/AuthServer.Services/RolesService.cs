@@ -7,6 +7,7 @@ using AuthServer.DomainClasses;
 using AuthServer.DomainClasses.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace AuthServer.Services
 {
@@ -18,7 +19,7 @@ namespace AuthServer.Services
         /// <returns>ICollection<Role></returns>
         Task<ICollection<Role>> GetAsync();
         Task<Role> GetAsync(int roleId);
-        Task<List<Role>> FindUserRolesAsync(Guid userId);
+        Task<List<Claim>> GetRolesAsClaimsAsync(Guid userId);
         Task<bool> IsUserInRole(Guid userId, string roleName);
         Task<List<User>> FindUsersInRoleAsync(string roleName);
         Task<List<User>> FindUsersInRoleAsync(int roleId);
@@ -52,14 +53,14 @@ namespace AuthServer.Services
             _userRoleQuery=_userRoles;
         }
 
-        public Task<List<Role>> FindUserRolesAsync(System.Guid userId)
+        public Task<List<Claim>> GetRolesAsClaimsAsync(System.Guid userId)
         {
-            var userRolesQuery = from role in _roles
-                                 from userRoles in role.UserRoles
+            var userRolesQuery = from role in _roles.Where(r => r.IsActive)
+                                 from userRoles in role.UserRoles.Where(r => r.IsActive)
                                  where userRoles.UserId == userId
-                                 select role;
-
-            return userRolesQuery.OrderBy(x => x.Name).ToListAsync();
+                                 select new Claim(ClaimTypes.Role,role.Name);
+            var roleAsClaims= userRolesQuery.OrderBy(x => x.Value).ToListAsync();
+            return roleAsClaims;
         }
 
         public async Task<bool> IsUserInRole(System.Guid userId, string roleName)

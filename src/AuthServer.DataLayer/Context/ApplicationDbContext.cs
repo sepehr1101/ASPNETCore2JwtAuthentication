@@ -164,6 +164,7 @@ namespace AuthServer.DataLayer.Context
                builder.Entity<AuthLevel1>(entity=>{
                 entity.Property(e=>e.AppBoundaryTitle).HasMaxLength(255).IsRequired();
                 entity.Property(e=>e.AppBoundaryCode).IsRequired();
+                entity.Property(e => e.InSidebar).IsRequired();
             });
         }
         private void BuildAuthLevel2Model(ModelBuilder builder)
@@ -202,6 +203,7 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e=>e.EnableValidIpRecaptcha).IsRequired();
                 entity.Property(e=>e.IsActive).IsRequired();
                 entity.Property(e=>e.LockInvalidAttempts).IsRequired();
+                entity.Property(e => e.LockMin).IsRequired();
                 entity.Property(e=>e.RequireRecaptchaInvalidAttempts).IsRequired();
                 entity.Property(e=>e.MinPasswordLength).IsRequired();
                 entity.Property(e=>e.PasswordContainsLowercase).IsRequired();

@@ -163,16 +163,13 @@ namespace AuthServer.Services
                 new Claim(ClaimTypes.UserData, user.Id.ToString())
             };
 
-            var extraClaims=_claimService.GetClaims(user.Id);
+            var extraClaims=await _claimService.GetClaimsAsync(user.Id);
             claims.AddRange(extraClaims);
 
             // add roles
-            var roles = await _rolesService.FindUserRolesAsync(user.Id).ConfigureAwait(false);
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role.Name));
-            }
-
+            var roleClaims= await _rolesService.GetRolesAsClaimsAsync(user.Id).ConfigureAwait(false);
+            claims.AddRange(roleClaims);
+            
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.Value.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(

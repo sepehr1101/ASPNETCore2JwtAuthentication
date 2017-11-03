@@ -21,11 +21,15 @@ namespace AuthServer.Services
         Task UpdateUserLastActivityDateAsync(Guid userId);
         Task RegisterUserAsync(User user);
         Task UpdateDeviceSerialAsync(Guid userId,string deviceId);
-         void UpdateUserAsync(User userInDb,UpdateUserViewModel userViewModel);
+        void UpdateUserAsync(User userInDb,UpdateUserViewModel userViewModel);
         Task<bool> CanFindUserAsync(int userCode);
         Task<bool> CanFindUserAsync(string lowercaseUsername);
         Task<bool> CanFindUserAsync(string lowercaseEmail,bool isEmail);
         Task<ICollection<User>> FindUsersAsync(IQueryable<UserClaim> userClaims,IQueryable<UserRole> userRoles);
+        void ChangeMyPassword(User user,string newPassword);
+        void FailedLoginAttempt(User user , Policy activePolicy);
+         void SuccessLoginAttempt(User user);
+        bool CanILogin(User user);
     }
 
     public class UsersService : IUsersService
@@ -160,6 +164,35 @@ namespace AuthServer.Services
                 select user;
             var userList= await userQuery.Distinct().ToListAsync().ConfigureAwait(false);
             return userList;                
+        }
+
+        public void ChangeMyPassword(User user,string newPassword)
+        {
+            user.Password= _securityService.GetSha256Hash(newPassword.Trim());
+        }       
+
+        public void FailedLoginAttempt(User user , Policy activePolicy)
+        {
+            user.InvalidLoginAttemptCount=user.InvalidLoginAttemptCount+1;
+            if(user.InvalidLoginAttemptCount>=activePolicy.LockInvalidAttempts)
+            {
+                user.IsLocked=true;
+                user.InvalidLoginAttemptCount=0;
+                user.LockTimespan=DateTimeOffset.UtcNow.AddMinutes(activePolicy.LockMin);               
+            }          
+        } 
+        public void SuccessLoginAttempt(User user)
+        {
+            user.IsLocked=false;
+            user.LockTimespan=DateTimeOffset.MinValue;
+        }
+        public bool CanILogin(User user)
+        {
+            if(user.IsLocked && user.LockTimespan>=DateTimeOffset.UtcNow)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

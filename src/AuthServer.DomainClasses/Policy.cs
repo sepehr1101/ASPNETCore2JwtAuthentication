@@ -6,6 +6,7 @@ namespace AuthServer.DomainClasses
         public bool EnableValidIpRecaptcha { get; set; }
         public int RequireRecaptchaInvalidAttempts { get; set; }
         public int LockInvalidAttempts { get; set; }
+        public int LockMin { get; set; }
         public bool IsActive { get; set; }
         public int MinPasswordLength { get; set; }
         public bool PasswordContainsNumber { get; set; }

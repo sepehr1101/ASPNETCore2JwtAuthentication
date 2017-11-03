@@ -14,6 +14,7 @@ namespace AuthServer.DomainClasses
 
         public int  AppBoundaryCode { get; set; } 
         public string AppBoundaryTitle { get; set; }
-        public virtual ICollection<AuthLevel2> Children { get; set; }
+        public bool InSidebar { get; set; }
+        public virtual ICollection<AuthLevel2> Children { get; set; }        
     }
 }

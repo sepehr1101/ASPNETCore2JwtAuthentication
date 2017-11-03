@@ -61,7 +61,7 @@ namespace AuthServer.WebApp.Controllers
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login([FromBody]  LoginInfo loginUser)
-        {           
+        {       
             bool canILogin=false;
             if (loginUser == null)
             {
@@ -75,6 +75,8 @@ namespace AuthServer.WebApp.Controllers
                 {
                     return Unauthorized();
                 }
+                var activePolicy=await _policyService.FindActiveAsync();
+                _usersService.FailedLoginAttempt(user,activePolicy);
                 var loginFailure = GetLogin(false,user);
                 _loginService.Add(loginFailure);
                 await _uow.SaveChangesAsync().ConfigureAwait(false);
@@ -85,10 +87,15 @@ namespace AuthServer.WebApp.Controllers
             {
                 return Unauthorized();
             }
+            if(!_usersService.CanILogin(user))
+            {
+                return BadRequest("به دلیل وارد کردن یوزر و پسوورد اشتباه نام کاربری شما قفل شده است");
+            }
             var accessList=await _authLevelService.GetMyAccessListAsync(user.Id);
             var (accessToken, refreshToken) = await _tokenStoreService.CreateJwtTokens(user).ConfigureAwait(false);
-            var loginSuccess = GetLogin(canILogin,user);
+            var loginSuccess = GetLogin(true,user);            
             _loginService.Add(loginSuccess);
+            _usersService.SuccessLoginAttempt(user);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
             return Ok(new { access_token = accessToken, refresh_token = refreshToken,accessList=accessList });
         }
