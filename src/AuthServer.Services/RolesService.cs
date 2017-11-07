@@ -31,6 +31,7 @@ namespace AuthServer.Services
         Task<ICollection<RoleInfo>> GetUserRoleInfoAsync(Guid userId);
         Task UpdateRole(Role role);
         IQueryable<UserRole> AddRolesToQuery(ICollection<int> roleIds);
+        Task<bool> IsDeviceIdRequired(Guid userId);
     }
 
     public class RolesService : IRolesService
@@ -188,6 +189,14 @@ namespace AuthServer.Services
             }
             _userRoleQuery=_userRoleQuery.Where(u => roleIds.Contains(u.RoleId) && u.IsActive);
             return _userRoleQuery;
+        }
+
+        public async Task<bool> IsDeviceIdRequired(Guid userId)
+        {
+            var userNeedDeviceId=await _userRoles.Where(u => u.UserId==userId && u.IsActive)
+                .Select(u => u.Role).Where(r => r.NeedDeviceId).AnyAsync();
+            return userNeedDeviceId;
+            
         }
     }
 }

@@ -20,6 +20,7 @@ namespace AuthServer.WebApp.Controllers
     public class AccountController : BaseController
     {
         private readonly IUsersService _usersService;
+        private readonly IRolesService _roleService;
         private readonly ITokenStoreService _tokenStoreService;
         private readonly ILoginService _loginService;
         private readonly IAuthLevelService _authLevelService;
@@ -33,6 +34,7 @@ namespace AuthServer.WebApp.Controllers
             ILoginService loginService,
             IAuthLevelService authLevelService,
             IPolicyService policyService,
+            IRolesService rolesService,
             IUnitOfWork uow,
             IMapper mapper)
         {
@@ -51,6 +53,9 @@ namespace AuthServer.WebApp.Controllers
             _policyService=policyService;
             _policyService.CheckArgumentIsNull(nameof(_policyService));
 
+            _roleService=rolesService;
+            _roleService.CheckArgumentIsNull(nameof(_roleService));
+
             _uow = uow;
             _uow.CheckArgumentIsNull(nameof(_uow));
 
@@ -63,9 +68,9 @@ namespace AuthServer.WebApp.Controllers
         public async Task<IActionResult> Login([FromBody]  LoginInfo loginUser)
         {       
             bool canILogin=false;
-            if (loginUser == null)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("user is not set.");
+                return BadRequest("لطفا داده های ورودی خود را کنترل فرمایید");
             }         
             var user = await _usersService.FindUserAsync(loginUser.Username, loginUser.Password).ConfigureAwait(false);
             if(user==null)
@@ -90,6 +95,13 @@ namespace AuthServer.WebApp.Controllers
             if(!_usersService.CanILogin(user))
             {
                 return BadRequest("به دلیل وارد کردن یوزر و پسوورد اشتباه نام کاربری شما قفل شده است");
+            }
+            if(await _roleService.IsDeviceIdRequired(user.Id))
+            {
+                if(!_usersService.CanMathDeviceId(user,loginUser))
+                {
+                    return BadRequest("لطفا ورودی های خود را کنترل فرمایید");
+                }
             }
             var accessList=await _authLevelService.GetMyAccessListAsync(user.Id);
             var (accessToken, refreshToken) = await _tokenStoreService.CreateJwtTokens(user).ConfigureAwait(false);
@@ -181,6 +193,14 @@ namespace AuthServer.WebApp.Controllers
                 .ConfigureAwait(false);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
             return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(Guid userId)
+        {
+            await _usersService.ResetPasswordAsync(userId);
+            await _uow.SaveChangesAsync();
+            return Ok("ریست کلمه عبور کاربر با موفقیت انجام شد");
         }
     }
 }

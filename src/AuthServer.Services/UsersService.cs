@@ -14,6 +14,7 @@ namespace AuthServer.Services
     {
         Task<string> GetSerialNumberAsync(Guid userId);
         Task<string> ChangeSerialNuberAsync(Guid userId);
+
         Task<User> FindUserAsync(string username, string password);
         Task<User> FindUserAsync(Guid userId);
         Task<User> FindUserAsync(string username);
@@ -22,14 +23,16 @@ namespace AuthServer.Services
         Task RegisterUserAsync(User user);
         Task UpdateDeviceSerialAsync(Guid userId,string deviceId);
         void UpdateUserAsync(User userInDb,UpdateUserViewModel userViewModel);
+        Task ResetPasswordAsync(Guid userId);
         Task<bool> CanFindUserAsync(int userCode);
         Task<bool> CanFindUserAsync(string lowercaseUsername);
         Task<bool> CanFindUserAsync(string lowercaseEmail,bool isEmail);
         Task<ICollection<User>> FindUsersAsync(IQueryable<UserClaim> userClaims,IQueryable<UserRole> userRoles);
         void ChangeMyPassword(User user,string newPassword);
         void FailedLoginAttempt(User user , Policy activePolicy);
-         void SuccessLoginAttempt(User user);
+        void SuccessLoginAttempt(User user);
         bool CanILogin(User user);
+        bool CanMathDeviceId(User user,LoginInfo loginInfo);
     }
 
     public class UsersService : IUsersService
@@ -64,7 +67,7 @@ namespace AuthServer.Services
         public async Task<User> FindUserAsync(string username)
         {
             var user=await _users.FirstOrDefaultAsync(u => 
-                u.Username.Trim()==username.Trim() && u.IncludeThisRecord).ConfigureAwait(false);
+                u.Username.Trim()==username.Trim()).ConfigureAwait(false);
             return user;
         }
 
@@ -125,7 +128,14 @@ namespace AuthServer.Services
             var newSerialNumber=Guid.NewGuid().ToString("N");
             userInDb.SerialNumber=newSerialNumber;            
         }
-
+        public async Task ResetPasswordAsync(Guid userId)
+        {
+            var user=await FindUserAsync(userId);
+            var newSerialNumber=Guid.NewGuid().ToString("N");
+            user.Password=_securityService.GetSha256Hash(user.Mobile.Trim());           
+            user.SerialNumber=newSerialNumber;            
+        }
+       
         public async Task<bool> CanFindUserAsync(int userCode)
         {
             var user=await _users.FirstOrDefaultAsync(u => u.UserCode==userCode);
@@ -193,6 +203,18 @@ namespace AuthServer.Services
                 return false;
             }
             return true;
+        }
+        public bool CanMathDeviceId(User user,LoginInfo loginInfo)
+        {
+            if(String.IsNullOrWhiteSpace(user.DeviceId) || String.IsNullOrEmpty(loginInfo.DeviceId))
+            {
+                return false;
+            }
+            if(user.DeviceId.Trim()==loginInfo.DeviceId.Trim())
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

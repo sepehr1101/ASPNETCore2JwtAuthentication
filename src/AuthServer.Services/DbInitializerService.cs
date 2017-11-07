@@ -58,12 +58,14 @@ namespace AuthServer.Services
                 using (var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>())
                 {
                     // Add default roles
-                    var adminRole = new Role { Name = CustomRoles.Admin,TitleFa="مدیر سیستم",IsActive=true };
-                    var userRole = new Role { Name = CustomRoles.User,TitleFa="کاربر",IsActive=true };
+                    var adminRole = new Role { Name = CustomRoles.Admin,TitleFa="مدیر سیستم",IsActive=true,NeedDeviceId=false };
+                    var userRole = new Role { Name = CustomRoles.User,TitleFa="کاربر",IsActive=true,NeedDeviceId=false };
+                    var counterReadingRole = new Role { Name = CustomRoles.CounterReader,TitleFa="مامور قرائت",IsActive=true,NeedDeviceId=true };
                     if (!context.Roles.Any())
                     {                       
                         context.Add(adminRole);
                         context.Add(userRole);
+                        context.Add(counterReadingRole);
                         //context.SaveChanges();
                     }
                     
@@ -180,28 +182,51 @@ namespace AuthServer.Services
         }
         private string GetAuthLevelQuery()
         {
-            var query=  @"INSERT [dbo].[AuthLevel1s] ([Id], [AppBoundaryCode], [AppBoundaryTitle]) VALUES (1, 1, N'مدیریت کاربران') 
-            INSERT [dbo].[AuthLevel1s] ([Id], [AppBoundaryCode], [AppBoundaryTitle]) VALUES (2, 2, N'قرائت')        
-            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (1, 1, N'fa-lock', N'ایجاد کاربر', N'l2_1')        
-            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (2, 2, N'fa-info', N'اطلاعات', N'l2_2')        
-            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (3, 1, N'fa-info', N'کاربران', N'l2_3')        
-            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (1, 1, N'', N'Auth', N'', N'UserManager', N'Add', N'افزودن', N'l3_1')        
-            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (2, 2, N'', N'', N'', N'Programmer', N'RenderExecuteQueryAll', N'مشاهده', N'l3_2')        
-            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (3, 2, N'', N'', N'', N'RoleManger', N'M1', N'مباحثه', N'l3_3')        
-            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (4, 3, N'', N'', N'', N'UserManager', N'CreateUser', N'ثبت کاربر', N'l3_4')        
-            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (1, 1, N'همه موارد', N'UserManager.Add')        
-            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (2, 2, N'همه', N'Programmer.RenderExecuteQueryAll')        
-            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (3, 3, N'all', N'C2.M1')        
-            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (4, 3, N'all', N'C2.M2')        
-            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (5, 4, N'همه', N'UserManager.CreateUser')";
+            var query=  @"
+            INSERT [dbo].[AuthLevel1s] ([Id], [AppBoundaryCode], [AppBoundaryTitle], [InSidebar]) VALUES (1, 1, N'مدیریت سیستم', 1)
+            INSERT [dbo].[AuthLevel1s] ([Id], [AppBoundaryCode], [AppBoundaryTitle], [InSidebar]) VALUES (2, 2, N'مدیریت سامانه قرائت', 1)
+            INSERT [dbo].[AuthLevel1s] ([Id], [AppBoundaryCode], [AppBoundaryTitle], [InSidebar]) VALUES (3, 3, N'تنظیمات شخصی', 0)
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (1, 1, N'fa-user', N'مدیریت کاربران', N'l2_1')
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (2, 2, N'fa-info', N'اطلاعات', N'l2_2')
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (3, 1, N'fa-group', N'مدیریت گروه  ها', N'l2_3')
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (4, 1, N'fa-lock', N'تنظیمات سیستم', N'l2_4')
+            INSERT [dbo].[AuthLevel2s] ([Id], [AuthLevel1Id], [IconClass], [Title], [ElementId]) VALUES (5, 3, N'', N'تنظیمات شخصی', N'l2_5')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (1, 1, N'', N'', N'', N'UserManager', N'CreateUser', N'افزودن کاربر', N'l3_1')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (2, 1, N'', N'', N'', N'UserManager', N'EditUser', N'ویرایش کاربر', N'l3_2')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (3, 1, N'', N'', N'', N'UserManager', N'Index', N'مشاهده کاربران', N'l3_3')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (4, 3, N'', N'', N'', N'RoleManager', N'Index', N'مشاهده گروه ها', N'l3_4')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (5, 1, N'', N'', N'', N'UserManager', N'SearchPro', N'جستجوی پیشرفته', N'l3_5')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (6, 4, N'', N'', N'', N'PolicyManager', N'PasswordPolicy', N'تنظیمات کلمه عبور', N'l3_6')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (7, 5, N'', N'', N'', N'Profile', N'Index', N'پروفایل', N'l3_7')
+            INSERT [dbo].[AuthLevel3s] ([Id], [AuthLevel2Id], [Domain], [PreRoute], [Parameters], [Controller], [Action], [Title], [ElementId]) VALUES (8, 5, N'', N'Auth', N'', N'UserManager', N'ChangePassword', N'تغییر پسوورد', N'l3_8')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (1, 1, N'همه موارد', N'UserManager.CreateUser')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (2, 3, N'مشاهده جدول همه کاربران', N'UserManager.Index')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (3, 3, N'خواندن اطلاعات جدول همه کاربران', N'UserManager.ReadAllUsers')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (4, 3, N'آزمایش', N'UserManager.Test')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (5, 4, N'مشاهده جدول ', N'RoleManager.Index')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (6, 4, N'خواندن اطلاعات جدول', N'RoleManager.ReadAll')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (7, 4, N'ویرایش گروه', N'RoleManager.UpdateRole')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (8, 5, N'انجام جستجو', N'UserManager.SearchPro')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (9, 6, N'مشاهده', N'PolicyManager.PasswordPolicy')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (10, 7, N'مشاهده', N'Profile.Index')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (11, 3, N'مشاهده اطلاعات کاربر جهت ویرایش', N'UserManager.EditUser')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (12, 3, N'مشاهده جدول اطلاعات ورود ها', N'LoginManager.UserLogins')
+            INSERT [dbo].[AuthLevel4s] ([Id], [AuthLevel3Id], [Title], [Value]) VALUES (13, 3, N'خواندن اطلاعات جدول ورود ها', N'LoginManager.ReadUserLogins')
+            ";
             return query;
         }
         private ICollection<UserClaim> GetUserClaims(Guid userId)
         {
-             var claim=new UserClaim{ClaimType=CustomClaimTypes.Action,
+             var addClaim=new UserClaim{ClaimType=CustomClaimTypes.Action,
                             ClaimValue="UserManager.Add",InsertBy=userId,IsActive=true,
                             InsertTimespan=DateTimeOffset.UtcNow};
-            var claims=new []{claim};
+            var allUserClaim=new UserClaim{ClaimType=CustomClaimTypes.Action,
+                            ClaimValue="UserManager.Index",InsertBy=userId,IsActive=true,
+                            InsertTimespan=DateTimeOffset.UtcNow};
+            var allUserReadClaim=new UserClaim{ClaimType=CustomClaimTypes.Action,
+                ClaimValue="UserManager.ReadAllUsers",InsertBy=userId,IsActive=true,
+                InsertTimespan=DateTimeOffset.UtcNow};
+            var claims=new []{addClaim,allUserClaim,allUserReadClaim};
             return claims;
         }
 

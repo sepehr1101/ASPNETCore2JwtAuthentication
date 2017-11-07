@@ -125,6 +125,7 @@ namespace AuthServer.DataLayer.Context
                 entity.Property(e => e.Name).HasMaxLength(450).IsRequired();
                 entity.Property(e =>e.TitleFa).HasMaxLength(450).IsRequired();
                 entity.Property(e=>e.IsActive).IsRequired();
+                entity.Property(e => e.NeedDeviceId).IsRequired();
                 entity.HasIndex(e => e.Name).IsUnique();
             });
         }

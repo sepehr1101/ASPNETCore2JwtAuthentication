@@ -121,7 +121,8 @@ namespace AuthServer.DataLayer.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     TitleFa=table.Column<string>(type:"nvarchar(450)",maxLength:450,nullable:false),
-                    IsActive=table.Column<bool>(type:"bit",nullable:false)
+                    IsActive=table.Column<bool>(type:"bit",nullable:false),
+                    NeedDeviceId = table.Column<bool>(type:"bit",nullable:false)
                 },
                 constraints: table =>
                 {
