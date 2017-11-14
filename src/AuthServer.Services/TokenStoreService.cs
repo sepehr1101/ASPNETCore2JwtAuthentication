@@ -157,6 +157,7 @@ namespace AuthServer.Services
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim("displayName", user.DisplayName),
                 new Claim("userId",user.Id.ToString()),
+                new Claim("userCode",user.UserCode.ToString()),
                 // to invalidate the cookie
                 new Claim(ClaimTypes.SerialNumber, user.SerialNumber),
                 // custom data

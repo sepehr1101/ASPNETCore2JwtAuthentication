@@ -15,6 +15,7 @@ namespace AuthServer.Services
         Task AddRangeAsync(ICollection<UserClaim> userClaims);
         Task<ICollection<Claim>> GetClaimsAsync(Guid userId);
         Task<ICollection<UserClaim>> GetUserClaimsAsync(Guid userId);
+        IQueryable<UserClaim> GetUserClaimsQuery(string claimType,string claimvalue);
         List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy);
         List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy,Guid userId);
         Task DisablePrviousClaims(Guid userId);
@@ -52,11 +53,16 @@ namespace AuthServer.Services
             var claims=await query.ToListAsync();
             return claims;
         }
-         public async Task<ICollection<UserClaim>> GetUserClaimsAsync(Guid userId)
+        public async Task<ICollection<UserClaim>> GetUserClaimsAsync(Guid userId)
         {
             var query=_userClaims.Where(u=>u.UserId==userId && u.IsActive);
             var userClaims= await query.ToListAsync().ConfigureAwait(false);
             return userClaims;
+        }
+        public IQueryable<UserClaim> GetUserClaimsQuery(string claimType,string claimvalue)
+        {   
+            var claims=_userClaims.Where(u => u.ClaimType.Trim()==claimType.Trim() && u.ClaimValue==claimvalue);
+            return claims;
         }
 
         public List<UserClaim> ConvertToClaims(string claimType,ICollection<string> claimValues,Guid insertedBy)
@@ -110,6 +116,5 @@ namespace AuthServer.Services
             _userClaimQuery=_userClaims.Where(u => claims.Contains(u.ClaimValue.Trim()) && u.IsActive);
             return _userClaimQuery;
         }
-     
     }
 }

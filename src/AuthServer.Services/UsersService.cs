@@ -18,6 +18,7 @@ namespace AuthServer.Services
         Task<User> FindUserAsync(string username, string password);
         Task<User> FindUserAsync(Guid userId);
         Task<User> FindUserAsync(string username);
+        Task<ICollection<User>> FindUsersAsync(IQueryable<UserClaim> userClaims,IQueryable<UserRole> userRoles);
         Task<ICollection<User>> Get(int take,int skip);
         Task UpdateUserLastActivityDateAsync(Guid userId);
         Task RegisterUserAsync(User user);
@@ -26,8 +27,7 @@ namespace AuthServer.Services
         Task ResetPasswordAsync(Guid userId);
         Task<bool> CanFindUserAsync(int userCode);
         Task<bool> CanFindUserAsync(string lowercaseUsername);
-        Task<bool> CanFindUserAsync(string lowercaseEmail,bool isEmail);
-        Task<ICollection<User>> FindUsersAsync(IQueryable<UserClaim> userClaims,IQueryable<UserRole> userRoles);
+        Task<bool> CanFindUserAsync(string lowercaseEmail,bool isEmail);      
         void ChangeMyPassword(User user,string newPassword);
         void FailedLoginAttempt(User user , Policy activePolicy);
         void SuccessLoginAttempt(User user);
@@ -175,7 +175,6 @@ namespace AuthServer.Services
             var userList= await userQuery.Distinct().ToListAsync().ConfigureAwait(false);
             return userList;                
         }
-
         public void ChangeMyPassword(User user,string newPassword)
         {
             user.Password= _securityService.GetSha256Hash(newPassword.Trim());

@@ -6,6 +6,7 @@ using AuthServer.Common;
 using AuthServer.DataLayer.Context;
 using AuthServer.DomainClasses;
 using AuthServer.DomainClasses.ViewModels;
+using AuthServer.DomainClasses.ConstantTypes;
 using AuthServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -167,6 +168,17 @@ namespace AuthServer.WebApp.Controllers
             var usersDisplayViewModel=_mapper.Map<List<UserDisplayViewModel>>(users);
             return Ok(usersDisplayViewModel);
         }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsersInRoleZone(int roleId,int zoneId)
+        {
+            var userClaimsQuery=_claimService.GetUserClaimsQuery(CustomClaimTypes.ZoneId,zoneId.ToString());
+            var userRoleQuery = _roleService.GetUserRolesQuery(roleId);
+            var users=await _userService.FindUsersAsync(userClaimsQuery,userRoleQuery);
+            var usersValueKeys =_mapper.Map<List<UserValueKey>>(users);
+            return Ok(usersValueKeys);
+        }       
 
         #region private methods (3)
          private User GetUser(RegisterUserViewModel registerUserViewModel)

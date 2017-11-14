@@ -16,6 +16,7 @@ namespace AuthServer.WebApp
             CreateMap<User,UserInfo>();
             CreateMap<Policy,PasswordPolicy>();
             CreateMap<Login,LoginViewModel>();
+            CreateMap<User,UserValueKey>();
         }
     }
 }
