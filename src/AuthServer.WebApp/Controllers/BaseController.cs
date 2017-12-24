@@ -6,6 +6,7 @@ using AuthServer.Common;
 using AuthServer.DataLayer.Context;
 using AuthServer.DomainClasses;
 using AuthServer.DomainClasses.ViewModels;
+using AuthServer.DomainClasses.ConstantTypes;
 using AuthServer.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -43,7 +44,7 @@ namespace AuthServer.WebApp.Controllers
             var shouldFindValue=String.Join(".",controller.Trim(),action.Trim());
             var identity = GetMyClaimsIdentity();
             var actionValue=identity.FindFirst(c =>
-                 c.Type =="action" &&
+                 c.Type ==CustomClaimTypes.Action &&
                  c.Value==shouldFindValue);
             if(actionValue==null)
             {

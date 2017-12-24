@@ -196,7 +196,7 @@ namespace AuthServer.Services
         {
             var query=GetUserListQuery(userId);
             var authSummeryList=_uow.ExecSQL<AuthSummaryAll>(query);
-            var authTree=GetAuthTree(authSummeryList);
+            var authTree=GetAuthTree(authSummeryList);               
             return authTree;
         }
         private string GetAccessListQuery(Guid userId)
@@ -226,7 +226,8 @@ namespace AuthServer.Services
 				join UserClaims u
 				on LTRIM(RTRIM(a4.Value))=LTRIM(RTRIM(u.ClaimValue)) and
 				u.UserId='{0}' and u.IsActive=1 
-                where a1.InSidebar=1";
+                where a1.InSidebar=1 
+                order by _2Id,_3Id";
             var completedQuery=String.Format(query,userId);
             return completedQuery;            
         }
@@ -258,7 +259,8 @@ namespace AuthServer.Services
                 on a3.Id=a4.AuthLevel3Id
 				left join UserClaims u
 				on LTRIM(RTRIM(a4.Value))=LTRIM(RTRIM(u.ClaimValue)) and
-				u.UserId='{0}' and u.IsActive=1";
+				u.UserId='{0}' and u.IsActive=1 
+                order by _2Id,_3Id";
             var completedQuery=String.Format(query,userId);
             return completedQuery;            
         }

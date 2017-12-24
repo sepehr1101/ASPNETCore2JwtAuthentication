@@ -16,9 +16,7 @@ using AutoMapper;
 
 namespace AuthServer.WebApp.Controllers
 {
-    [Route("[controller]")]
     [EnableCors("CorsPolicy")]
-    //[Authorize]
      public class GatewayController : BaseController
     {        
          public GatewayController()
