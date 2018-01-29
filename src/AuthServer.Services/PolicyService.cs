@@ -25,6 +25,8 @@ namespace AuthServer.Services
         {
             _uow=uow;
             _policies=_uow.Set<Policy>();
+
+            
         }
         public async Task<Policy> FindFirstAsync()
         {

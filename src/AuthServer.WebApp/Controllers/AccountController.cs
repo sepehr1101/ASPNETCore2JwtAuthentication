@@ -183,16 +183,45 @@ namespace AuthServer.WebApp.Controllers
         [HttpPatch]
         public async Task<IActionResult> UpdateDeviceId(string deviceId)
         {
-            var policy=await _policyService.FindFirstAsync();
+            var policy=await _policyService.FindFirstAsync();            
+            var simpleMessage=new SimpleMessageResponse();
             if(!policy.CanUpdateDeviceId)
             {
-                return BadRequest("can`t update deviceId");
+                simpleMessage.Message="امکان به روز رسانی سریال دستگاه وجود ندارد";
+                return BadRequest(simpleMessage);
             }
             var userId=GetMyUserId();
             await _usersService.UpdateDeviceSerialAsync(userId,deviceId)
                 .ConfigureAwait(false);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
-            return Ok();
+            simpleMessage.Message="تغییر یا ثبت سریال دستگاه با موفقیت انجام شد";
+            return Ok(simpleMessage);
+        }
+         [HttpPatch]
+         [AllowAnonymous]
+        public async Task<IActionResult> UpdateDeviceIdAnanymous([FromBody]  LoginInfo loginUser)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("لطفا داده های ورودی خود را کنترل فرمایید");
+            }        
+             var user = await _usersService.FindUserAsync(loginUser.Username, loginUser.Password).ConfigureAwait(false);
+            if(user==null)
+            {
+                return Unauthorized();
+            }
+            var policy=await _policyService.FindActiveAsync();            
+            var simpleMessage=new SimpleMessageResponse();
+            if(!policy.CanUpdateDeviceId)
+            {
+                simpleMessage.Message="امکان به روز رسانی سریال دستگاه وجود ندارد";
+                return BadRequest(simpleMessage);
+            }  
+            await _usersService.UpdateDeviceSerialAsync(user.Id,loginUser.DeviceId)
+                .ConfigureAwait(false);
+            await _uow.SaveChangesAsync().ConfigureAwait(false);
+            simpleMessage.Message="تغییر یا ثبت سریال دستگاه با موفقیت انجام شد";
+            return Ok(simpleMessage);
         }
 
         [HttpPost]

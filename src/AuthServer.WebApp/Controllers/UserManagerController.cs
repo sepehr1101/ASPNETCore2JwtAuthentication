@@ -131,9 +131,11 @@ namespace AuthServer.WebApp.Controllers
         [HttpPatch]
         public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordViewModel changePasswordViewModel)
         {
+            var simpleMessageresponse=new SimpleMessageResponse();
             if(!ModelState.IsValid)
             {
-                return BadRequest("لطفا ورودی های خود را کنترل فرمایید");
+                simpleMessageresponse.Message="لطفا ورودی های خود را کنترل فرمایید";
+                return BadRequest(simpleMessageresponse);
             }
              var passwordValidationError=_passwordValidator.ValidatePassword(changePasswordViewModel.NewPassword);
             if(passwordValidationError.HasError)
@@ -144,11 +146,13 @@ namespace AuthServer.WebApp.Controllers
             var user= await _userService.FindUserAsync(username,changePasswordViewModel.CurrentPassword);
             if(user==null)
             {
-                return BadRequest("پسوورد قبلی را اشتباه وارد نموده اید");
+                simpleMessageresponse.Message="پسوورد قبلی را اشتباه وارد نموده اید";
+                return BadRequest(simpleMessageresponse);
             }
             _userService.ChangeMyPassword(user,changePasswordViewModel.NewPassword);
             await _uow.SaveChangesAsync();
-            return Ok("کلمه عبور با موفقیت تغییر یافت");
+            simpleMessageresponse.Message="پسوورد با موفقیت تغییر یافت";
+            return Ok(simpleMessageresponse);
         }
 
         [HttpGet]
