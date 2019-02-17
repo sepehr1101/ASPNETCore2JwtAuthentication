@@ -49,7 +49,8 @@ namespace AuthServer.WebApp
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection"),
+                    //Configuration.GetConnectionString("DefaultConnection"),
+                    GetConnectionString(),
                     serverDbContextOptionsBuilder =>
                         {
                             var minutes = (int)TimeSpan.FromMinutes(3).TotalSeconds;
@@ -81,7 +82,6 @@ namespace AuthServer.WebApp
                     {
                         ValidIssuer = Configuration["BearerTokens:Issuer"],
                         ValidAudience = Configuration["BearerTokens:Audience"],
-                        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["BearerTokens:Key"])),
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["BearerTokens:Key"])),
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
@@ -191,6 +191,15 @@ namespace AuthServer.WebApp
                 context.Response.ContentType = "text/html";
                 await context.Response.SendFileAsync(Path.Combine(env.WebRootPath, "index.html"));
             });
+        }
+
+        private string GetConnectionString()
+        {
+            var localConnectionString="Data Source=.;Initial Catalog=AuthDb16;Integrated Security=True;MultipleActiveResultSets=True;";
+            var debugConnectionString= "Data Source=81.90.148.26;Initial Catalog=AuthDb1;Integrated Security=false;User Id=gharaat_mobile;Password=P@ssGHP@ss;MultipleActiveResultSets=True;";
+            var tswReleaseConnectionString= "Data Source=172.30.1.22;Initial Catalog=AuthDb1;Integrated Security=false;User Id=gharaat_mobile;Password=P@ssGHP@ss;MultipleActiveResultSets=True;";
+            var esfConnectionString="Data Source=172.18.12.60;Initial Catalog=AuthDb;Integrated Security=false;User Id=admin3;Password=gharib_shams$@1;MultipleActiveResultSets=True;";            
+            return esfConnectionString; 
         }
     }
 }

@@ -66,7 +66,7 @@ namespace AuthServer.Services
         }
         public IQueryable<UserRole> GetUserRolesQuery(int roleId)
         {
-            var userRolesQuery=_userRoles.Where(r => r.RoleId==roleId);
+            var userRolesQuery=_userRoles.Where(r => r.RoleId==roleId && r.IsActive);
             return userRolesQuery;
         }
 
@@ -84,8 +84,9 @@ namespace AuthServer.Services
         public Task<List<User>> FindUsersInRoleAsync(string roleName)
         {
             var roleUserIdsQuery = from role in _roles
-                                   where role.Name == roleName && role.IsActive
+                                      where role.Name == roleName && role.IsActive
                                    from user in role.UserRoles
+                                      where user.IsActive
                                    select user.UserId;
             return _users.Where(user => roleUserIdsQuery.Contains(user.Id) && user.IncludeThisRecord)
                          .ToListAsync();
@@ -93,8 +94,9 @@ namespace AuthServer.Services
          public Task<List<User>> FindUsersInRoleAsync(int roleId)
         {
             var roleUserIdsQuery = from role in _roles
-                                   where role.Id == roleId && role.IsActive
-                                   from user in role.UserRoles
+                                     where role.Id == roleId && role.IsActive
+                                   from user in role.UserRoles 
+                                     where user.IsActive
                                    select user.UserId;
             return _users.Where(user => roleUserIdsQuery.Contains(user.Id) && user.IncludeThisRecord)
                          .ToListAsync();

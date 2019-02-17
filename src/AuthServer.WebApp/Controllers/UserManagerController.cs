@@ -182,7 +182,34 @@ namespace AuthServer.WebApp.Controllers
             var users=await _userService.FindUsersAsync(userClaimsQuery,userRoleQuery);
             var usersValueKeys =_mapper.Map<List<UserValueKey>>(users);
             return Ok(usersValueKeys);
-        }       
+        }      
+        
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsersInRole(int roleId)
+        {
+            var userRoleQuery = _roleService.GetUserRolesQuery(roleId);
+            var users= await _userService.FindUsersAsync(userRoleQuery);
+            var usersValueKeys =_mapper.Map<List<UserValueKey>>(users);
+            return Ok(usersValueKeys);
+        }
+
+        [HttpGet,HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUsersByCode(ICollection<int> userCodes)
+        {
+            var usersCodesTitle= await _userService.GetUsersCodeTitle(userCodes);
+            return Ok(usersCodesTitle);
+        }
+
+        [HttpGet,HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUserByUserId(Guid id)
+        {
+            var user= await _userService.FindUserAsync(id);
+            var userInfo=new {UserCode=user.UserCode,DisplayName=user.DisplayName,Mobile=user.Mobile};
+            return Ok(userInfo);
+        }
 
         #region private methods (3)
          private User GetUser(RegisterUserViewModel registerUserViewModel)

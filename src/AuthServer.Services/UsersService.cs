@@ -19,6 +19,8 @@ namespace AuthServer.Services
         Task<User> FindUserAsync(Guid userId);
         Task<User> FindUserAsync(string username);
         Task<ICollection<User>> FindUsersAsync(IQueryable<UserClaim> userClaims,IQueryable<UserRole> userRoles);
+        Task<ICollection<User>> FindUsersAsync(IQueryable<UserRole> userRoles);
+        Task<ICollection<KeyValuePair<int,string>>> GetUsersCodeTitle(ICollection<int> userCodes);
         Task<ICollection<User>> Get(int take,int skip);
         Task UpdateUserLastActivityDateAsync(Guid userId);
         Task RegisterUserAsync(User user);
@@ -175,6 +177,23 @@ namespace AuthServer.Services
             var userList= await userQuery.Distinct().ToListAsync().ConfigureAwait(false);
             return userList;                
         }
+        public async Task<ICollection<User>> FindUsersAsync(IQueryable<UserRole> userRoles)
+        {            
+            var userQuery=from user in _users
+                join userRole in userRoles
+                on user.Id equals userRole.UserId
+                select user;
+            var userList= await userQuery.Distinct().ToListAsync().ConfigureAwait(false);
+            return userList;
+        }
+        public async Task<ICollection<KeyValuePair<int,string>>> GetUsersCodeTitle(ICollection<int> userCodes)
+        {           
+            var query=_users.Where(u => userCodes.Contains(u.UserCode))
+                .Select(u => new KeyValuePair<int,string>(u.UserCode,u.DisplayName));
+            var users= await query.ToListAsync();
+            return users;
+        }
+
         public void ChangeMyPassword(User user,string newPassword)
         {
             user.Password= _securityService.GetSha256Hash(newPassword.Trim());

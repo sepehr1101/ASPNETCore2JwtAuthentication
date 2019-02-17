@@ -35,7 +35,7 @@ namespace AuthServer.WebApp.Controllers
              _passwordValidator=passwordValidator;
          }
 
-         [HttpGet]         
+         [HttpGet]       
          public async Task<IActionResult> GetUsersInRole(int roleId)
          {
              var roles=await _roleService.FindUsersInRoleAsync(roleId).ConfigureAwait(false);

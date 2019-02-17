@@ -61,6 +61,7 @@ namespace AuthServer.Services
                     var adminRole = new Role { Name = CustomRoles.Admin,TitleFa="مدیر سیستم",IsActive=true,NeedDeviceId=false };
                     var userRole = new Role { Name = CustomRoles.User,TitleFa="کاربر",IsActive=true,NeedDeviceId=false };
                     var counterReadingRole = new Role { Name = CustomRoles.CounterReader,TitleFa="مامور قرائت",IsActive=true,NeedDeviceId=true };
+                    var examinerRole =new Role { Name = CustomRoles.Examiner,TitleFa="ارزیاب",IsActive=true,NeedDeviceId=false };
                     if (!context.Roles.Any())
                     {                       
                         context.Add(adminRole);

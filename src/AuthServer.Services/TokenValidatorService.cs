@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthServer.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Cryptography;
 
 namespace AuthServer.Services
 {
@@ -24,6 +25,7 @@ namespace AuthServer.Services
 
             _tokenStoreService = tokenStoreService;
             _tokenStoreService.CheckArgumentIsNull(nameof(_tokenStoreService));
+            
         }
 
         public async Task ValidateAsync(TokenValidatedContext context)
