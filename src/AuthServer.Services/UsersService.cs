@@ -88,7 +88,11 @@ namespace AuthServer.Services
       
         public async Task<ICollection<User>> Get(int take,int skip)
         {
-            var users=await _users.OrderBy(u => u.Username).Skip(skip).Take(take).ToListAsync();
+            var users=await _users.Where(u => u.IsActive)
+                .OrderBy(u => u.Username)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
             return users;
         }
         public async Task UpdateUserLastActivityDateAsync(Guid userId)

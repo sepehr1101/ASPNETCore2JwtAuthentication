@@ -61,7 +61,7 @@ namespace AuthServer.WebApp.Controllers
          }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers(int take=200,int skip=0)
+        public async Task<IActionResult> GetAllUsers(int take=500,int skip=0)
         {
             var users=await _userService.Get(take,skip).ConfigureAwait(false);
             var usersDisplayViewModel=_mapper.Map<List<UserDisplayViewModel>>(users);
@@ -83,28 +83,37 @@ namespace AuthServer.WebApp.Controllers
         [HttpPut]    
         public async Task<IActionResult> RegisterUser([FromBody]RegisterUserViewModel registerUserViewModel)
         {
+            var simpleMessageCode=new SimpleMessageCodeResponse();
             string _errorMessage=String.Empty;
             if(!ModelState.IsValid)
             {                 
-                return BadRequest("خطا در اطلاعات ارسالی ، لطفا ورودی های خود را کنترل فرمایید");
+                simpleMessageCode.Code=400;
+                simpleMessageCode.Message="خطا در اطلاعات ارسالی ، لطفا ورودی های خود را کنترل فرمایید";
+                return Ok(simpleMessageCode);
             }
             var passwordValidationError=_passwordValidator.ValidatePassword(registerUserViewModel.Password);
             if(passwordValidationError.HasError)
             {
-                return BadRequest(passwordValidationError.Error);
+                simpleMessageCode.Code=400;
+                simpleMessageCode.Message=(String)passwordValidationError.Error;
+                return Ok(simpleMessageCode);
             }
             var user = GetUser(registerUserViewModel);
             var errorInfo=await GetUserRegisterError(user);
             if(errorInfo.HasError)
             {
-                return BadRequest(errorInfo.HasError);
+                simpleMessageCode.Code=400;
+                simpleMessageCode.Message=(String)errorInfo.Error;
+                return Ok(simpleMessageCode);
             }      
             await _userService.RegisterUserAsync(user).ConfigureAwait(false);
             await _uow.SaveChangesAsync().ConfigureAwait(false);
-            var successMessage=String.Join(" ","کاربر","با کد کاربری",registerUserViewModel.UserCode,"و نام ",
+
+            simpleMessageCode.Code=200;
+            simpleMessageCode.Message=String.Join(" ","کاربر","با کد کاربری",registerUserViewModel.UserCode,"و نام ",
                 registerUserViewModel.DisplayName,"با موفقیت ثبت شد");
             //var simpleMessageresponse=new SimpleMessageResponse(successMessage);
-            return Ok(successMessage);
+            return Ok(simpleMessageCode);
         }
 
         [HttpPatch]
