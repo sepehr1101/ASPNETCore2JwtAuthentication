@@ -61,7 +61,7 @@ namespace AuthServer.Services
         }
         public IQueryable<UserClaim> GetUserClaimsQuery(string claimType,string claimvalue)
         {   
-            var claims=_userClaims.Where(u => u.ClaimType.Trim()==claimType.Trim() && u.ClaimValue==claimvalue);
+            var claims=_userClaims.Where(u => u.ClaimType.Trim()==claimType.Trim() && u.ClaimValue==claimvalue && u.IsActive);
             return claims;
         }
 

@@ -16,6 +16,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using AutoMapper;
+using ElmahCore;
+using ElmahCore.Mvc;
+using ElmahCore.Sql;
 
 namespace AuthServer.WebApp
 {
@@ -58,6 +61,11 @@ namespace AuthServer.WebApp
                             serverDbContextOptionsBuilder.EnableRetryOnFailure();
                         });
             });
+            services.AddElmah<SqlErrorLog>(options =>
+            {
+                var connectionString="Data Source=172.18.12.60;Initial Catalog=Elmah;Integrated Security=false;User Id=admin3;Password=gharib_shams$@1;MultipleActiveResultSets=True;";
+                options.ConnectionString = connectionString; // DB structure see here: https://bitbucket.org/project-elmah/main/downloads/ELMAH-1.2-db-SQLServer.sql
+            });
 
             // Only needed for custom roles.
             services.AddAuthorization(options =>
@@ -93,6 +101,7 @@ namespace AuthServer.WebApp
                         {
                             var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(JwtBearerEvents));
                             logger.LogError("Authentication failed.", context.Exception);
+                            context.HttpContext.RiseError(context.Exception);
                             return Task.CompletedTask;
                         },
                         OnTokenValidated = context =>
@@ -108,6 +117,7 @@ namespace AuthServer.WebApp
                         {
                             var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(JwtBearerEvents));
                             logger.LogError("OnChallenge error", context.Error, context.ErrorDescription);
+                            context.HttpContext.RiseError(new Exception(context.ErrorDescription));
                             return Task.CompletedTask;
                         }
                     };
@@ -184,13 +194,13 @@ namespace AuthServer.WebApp
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
+             app.UseElmah();
             // catch-all handler for HTML5 client routes - serve index.html
             app.Run(async context =>
             {
                 context.Response.ContentType = "text/html";
                 await context.Response.SendFileAsync(Path.Combine(env.WebRootPath, "index.html"));
-            });
+            });           
         }
 
         private string GetConnectionString()

@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Newtonsoft.Json.Linq;
 using AutoMapper;
+using ElmahCore;
+using Microsoft.Web.Administration;
 
 namespace AuthServer.WebApp.Controllers
 {
@@ -32,7 +34,25 @@ namespace AuthServer.WebApp.Controllers
              {
                  return Ok();
              }
+             var exceptionMessage=String.Join(": ","username",GetMyUsername(),"controller",controller1,"action",action1);
+             HttpContext.RiseError(new UnauthorizedAccessException(exceptionMessage));
              return Unauthorized();
          }
+
+         [AllowAnonymous]
+         public IActionResult MakeException()
+         {
+             HttpContext.RiseError(new Exception("test exception"));
+             return Unauthorized();
+         }
+
+         [AllowAnonymous]
+          public IActionResult ResetIIS()
+          {
+            var yourAppPool=new ServerManager().ApplicationPools["DefaultAppPool"];
+            if(yourAppPool!=null)
+            yourAppPool.Start();
+            return Content("IIS Restart Done");
+          }
     }
 }

@@ -20,6 +20,7 @@ namespace AuthServer.Services
         Task<ICollection<Role>> GetAsync();
         Task<Role> GetAsync(int roleId);
         Task<List<Claim>> GetRolesAsClaimsAsync(Guid userId);
+        Task<List<Claim>> GetRoleIdsAsClaimsAsync(System.Guid userId);
         IQueryable<UserRole> GetUserRolesQuery(int roleId);
         Task<bool> IsUserInRole(Guid userId, string roleName);
         Task<List<User>> FindUsersInRoleAsync(string roleName);
@@ -61,6 +62,15 @@ namespace AuthServer.Services
                                  from userRoles in role.UserRoles.Where(r => r.IsActive)
                                  where userRoles.UserId == userId
                                  select new Claim(ClaimTypes.Role,role.Name);
+            var roleAsClaims= userRolesQuery.OrderBy(x => x.Value).ToListAsync();
+            return roleAsClaims;
+        }
+         public Task<List<Claim>> GetRoleIdsAsClaimsAsync(System.Guid userId)
+        {
+            var userRolesQuery = from role in _roles.Where(r => r.IsActive)
+                                 from userRoles in role.UserRoles.Where(r => r.IsActive)
+                                 where userRoles.UserId == userId
+                                 select new Claim("roleId",role.Id.ToString());
             var roleAsClaims= userRolesQuery.OrderBy(x => x.Value).ToListAsync();
             return roleAsClaims;
         }
